@@ -19,9 +19,9 @@ export async function createBundle(options) {
     if (options.harPath) {
         try {
             const harContent = await fs.readFile(options.harPath);
-            const harFilename = path.basename(options.harPath);
-            zip.addFile(harFilename, harContent);
-            contents.push(harFilename);
+            // Always use standard filename for consistency
+            zip.addFile('recording.har', harContent);
+            contents.push('recording.har');
         }
         catch (error) {
             console.warn(`⚠️  HAR file not found: ${options.harPath}`);

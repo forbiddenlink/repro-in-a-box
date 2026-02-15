@@ -108,10 +108,6 @@ describe('analyzeConsistency', () => {
       depth: 0,
       detectorResults: [{
         detector: 'test-detector',
-        url: 'https://example.com',
-        startTime: Date.now(),
-        endTime: Date.now(),
-        duration: 0,
         issues: issueIds.map(id => ({
           type: 'test-issue',
           message: `Issue ${id}`,

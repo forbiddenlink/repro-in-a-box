@@ -13,10 +13,6 @@ describe('diffScans', () => {
       depth: 0,
       detectorResults: [{
         detector: 'test-detector',
-        url: 'https://example.com',
-        startTime: Date.now(),
-        endTime: Date.now(),
-        duration: 0,
         issues: Array.from({ length: issueCount }, (_, i) => ({
           type: 'test-issue',
           message: `Issue ${i}`,
@@ -107,11 +103,7 @@ describe('analyzeConsistency', () => {
       url: 'https://example.com',
       depth: 0,
       detectorResults: [{
-        detector: 'test-detector',
-        url: 'https://example.com',
-        startTime: Date.now(),
-        endTime: Date.now(),
-        duration: 0,
+        detectorId: 'test-detector',
         issues: issueIds.map(id => ({
           type: 'test-issue',
           message: `Issue ${id}`,
