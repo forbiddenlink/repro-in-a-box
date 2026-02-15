@@ -4,7 +4,9 @@ import {
   DetectorRegistry,
   JavaScriptErrorsDetector,
   NetworkErrorsDetector,
-  BrokenAssetsDetector
+  BrokenAssetsDetector,
+  MixedContentDetector,
+  BrokenLinksDetector
 } from '../src/detectors/index.js';
 
 describe('Detector Framework', () => {
@@ -62,20 +64,56 @@ describe('Detector Framework', () => {
     const jsErrors = registry.get('js-errors');
     expect(jsErrors).toBeDefined();
 
-    if (jsErrors) {
-      await jsErrors.setup();
-      await jsErrors.attach(page);
-      
-      // Navigate to a simple page
-      await page.goto('https://example.com');
-      
-      // Collect results
-      const result = await jsErrors.collect(page);
-      
-      expect(result.detector).toBe('js-errors');
-      expect(result.url).toContain('example.com');
-      expect(result.issues).toBeInstanceOf(Array);
-      expect(result.duration).toBeGreaterThan(0);
-    }
+    if (!jsErrors) return;
+    
+    await jsErrors.setup();
+    await jsErrors.attach(page);
+    
+    // Navigate to a simple page
+    await page.goto('https://example.com');
+    
+    // Collect results
+    const result = await jsErrors.collect(page);
+    
+    expect(result.detector).toBe('js-errors');
+    expect(result.url).toContain('example.com');
+    expect(result.issues).toBeInstanceOf(Array);
+    expect(result.duration).toBeGreaterThan(0);
+  });
+});
+
+describe('Mixed Content Detector', () => {
+  it('should have correct metadata', () => {
+    const detector = new MixedContentDetector();
+    
+    expect(detector.id).toBe('mixed-content');
+    expect(detector.name).toBe('Mixed Content');
+    expect(detector.category).toBe('security');
+  });
+
+  it('should be instantiable', () => {
+    const detector = new MixedContentDetector();
+    expect(detector).toBeDefined();
+    expect(typeof detector.setup).toBe('function');
+    expect(typeof detector.attach).toBe('function');
+    expect(typeof detector.collect).toBe('function');
+  });
+});
+
+describe('Broken Links Detector', () => {
+  it('should have correct metadata', () => {
+    const detector = new BrokenLinksDetector();
+    
+    expect(detector.id).toBe('broken-links');
+    expect(detector.name).toBe('Broken Links');
+    expect(detector.category).toBe('links');
+  });
+
+  it('should be instantiable', () => {
+    const detector = new BrokenLinksDetector();
+    expect(detector).toBeDefined();
+    expect(typeof detector.setup).toBe('function');
+    expect(typeof detector.attach).toBe('function');
+    expect(typeof detector.scan).toBe('function');
   });
 });
