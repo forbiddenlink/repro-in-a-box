@@ -1,0 +1,206 @@
+[
+  {
+    "url": "https://example.com",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 638
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 642
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 634
+      }
+    ],
+    "successRate": 1
+  },
+  {
+    "url": "https://github.com",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 1902
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 1893
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 1917
+      }
+    ],
+    "successRate": 1
+  },
+  {
+    "url": "https://news.ycombinator.com",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 654
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 651
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 648
+      }
+    ],
+    "successRate": 1
+  },
+  {
+    "url": "https://stackoverflow.com",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 1454
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 2736
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 1540
+      }
+    ],
+    "successRate": 1
+  },
+  {
+    "url": "https://playwright.dev",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 729
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 730
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 739
+      }
+    ],
+    "successRate": 1
+  },
+  {
+    "url": "https://vercel.com",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 1743
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 1721
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 1718
+      }
+    ],
+    "successRate": 1
+  },
+  {
+    "url": "https://stripe.com/docs",
+    "recorded": false,
+    "replays": [],
+    "successRate": 0
+  },
+  {
+    "url": "https://developer.mozilla.org",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 236
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 233
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 221
+      }
+    ],
+    "successRate": 1
+  },
+  {
+    "url": "https://reddit.com",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 157
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 140
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 139
+      }
+    ],
+    "successRate": 1
+  },
+  {
+    "url": "https://npmjs.com",
+    "recorded": true,
+    "replays": [
+      {
+        "attempt": 1,
+        "success": true,
+        "duration": 2820
+      },
+      {
+        "attempt": 2,
+        "success": true,
+        "duration": 2719
+      },
+      {
+        "attempt": 3,
+        "success": true,
+        "duration": 2762
+      }
+    ],
+    "successRate": 1
+  }
+]

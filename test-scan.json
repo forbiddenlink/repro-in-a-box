@@ -1,0 +1,263 @@
+{
+  "config": {
+    "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+    "headless": true,
+    "crawler": {
+      "maxDepth": 0,
+      "maxPages": 1,
+      "rateLimitMs": 1000,
+      "sameDomain": true
+    }
+  },
+  "startTime": 1771186840481,
+  "endTime": 1771186843416,
+  "duration": 2935,
+  "pages": [
+    {
+      "page": {
+        "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+        "depth": 0,
+        "statusCode": 200,
+        "timestamp": 1771186841172
+      },
+      "detectors": [
+        {
+          "detector": "js-errors",
+          "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+          "startTime": 1771186840621,
+          "endTime": 1771186843416,
+          "duration": 2795,
+          "issues": [
+            {
+              "type": "console-error",
+              "message": "Console error: Failed to load resource: net::ERR_FILE_NOT_FOUND",
+              "severity": "warning",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840671,
+              "details": "file:///Volumes/LizsDisk/repro-in-a-box/nonexistent.css"
+            },
+            {
+              "type": "console-error",
+              "message": "Console error: Failed to load resource: net::ERR_FILE_NOT_FOUND",
+              "severity": "warning",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840671,
+              "details": "file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-image.png"
+            },
+            {
+              "type": "console-error",
+              "message": "Console error: Test console error",
+              "severity": "warning",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840672,
+              "details": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html"
+            },
+            {
+              "type": "console-error",
+              "message": "Console error: Failed to load resource: net::ERR_FILE_NOT_FOUND",
+              "severity": "warning",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840672,
+              "details": "file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-script.js"
+            },
+            {
+              "type": "js-error",
+              "message": "Uncaught exception: Test uncaught exception",
+              "severity": "error",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840773,
+              "details": "Error: Test uncaught exception\n    at file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html:56:17"
+            },
+            {
+              "type": "js-error",
+              "message": "Uncaught exception: Test unhandled rejection",
+              "severity": "error",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840872,
+              "details": "Error: Test unhandled rejection\n    at file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html:65:26"
+            },
+            {
+              "type": "console-error",
+              "message": "Console error: Fetch API cannot load file:///nonexistent-api. URL scheme \"file\" is not supported.",
+              "severity": "warning",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840972,
+              "details": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html"
+            },
+            {
+              "type": "console-error",
+              "message": "Console error: Fetch failed: TypeError: Failed to fetch\n    at file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html:89:11",
+              "severity": "warning",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840972,
+              "details": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html"
+            },
+            {
+              "type": "unhandled-rejection",
+              "message": "Unhandled promise rejection: Error: Test unhandled rejection",
+              "severity": "error",
+              "category": "javascript",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186842175,
+              "details": "Error: Test unhandled rejection\n    at file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html:65:26"
+            }
+          ]
+        },
+        {
+          "detector": "network-errors",
+          "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+          "startTime": 1771186840621,
+          "endTime": 1771186843416,
+          "duration": 2795,
+          "issues": [
+            {
+              "type": "request-failed",
+              "message": "Request failed: GET file:///Volumes/LizsDisk/repro-in-a-box/nonexistent.css",
+              "severity": "error",
+              "category": "network",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840671,
+              "details": "{\n  \"method\": \"GET\",\n  \"url\": \"file:///Volumes/LizsDisk/repro-in-a-box/nonexistent.css\",\n  \"resourceType\": \"stylesheet\",\n  \"errorText\": \"net::ERR_FILE_NOT_FOUND\",\n  \"headers\": {\n    \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/133.0.6943.16 Safari/537.36\",\n    \"referer\": \"\"\n  }\n}"
+            },
+            {
+              "type": "request-failed",
+              "message": "Request failed: GET file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-image.png",
+              "severity": "error",
+              "category": "network",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840671,
+              "details": "{\n  \"method\": \"GET\",\n  \"url\": \"file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-image.png\",\n  \"resourceType\": \"image\",\n  \"errorText\": \"net::ERR_FILE_NOT_FOUND\",\n  \"headers\": {\n    \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/133.0.6943.16 Safari/537.36\",\n    \"referer\": \"\"\n  }\n}"
+            },
+            {
+              "type": "request-failed",
+              "message": "Request failed: GET file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-script.js",
+              "severity": "error",
+              "category": "network",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840672,
+              "details": "{\n  \"method\": \"GET\",\n  \"url\": \"file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-script.js\",\n  \"resourceType\": \"script\",\n  \"errorText\": \"net::ERR_FILE_NOT_FOUND\",\n  \"headers\": {\n    \"user-agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/133.0.6943.16 Safari/537.36\",\n    \"referer\": \"\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "detector": "broken-assets",
+          "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+          "startTime": 1771186840621,
+          "endTime": 1771186843416,
+          "duration": 2795,
+          "issues": [
+            {
+              "type": "failed-stylesheet",
+              "message": "Failed to load stylesheet: file:///Volumes/LizsDisk/repro-in-a-box/nonexistent.css",
+              "severity": "warning",
+              "category": "assets",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840671,
+              "details": "{\n  \"url\": \"file:///Volumes/LizsDisk/repro-in-a-box/nonexistent.css\",\n  \"resourceType\": \"stylesheet\",\n  \"errorText\": \"net::ERR_FILE_NOT_FOUND\",\n  \"method\": \"GET\"\n}"
+            },
+            {
+              "type": "failed-image",
+              "message": "Failed to load image: file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-image.png",
+              "severity": "warning",
+              "category": "assets",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840671,
+              "details": "{\n  \"url\": \"file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-image.png\",\n  \"resourceType\": \"image\",\n  \"errorText\": \"net::ERR_FILE_NOT_FOUND\",\n  \"method\": \"GET\"\n}"
+            },
+            {
+              "type": "failed-script",
+              "message": "Failed to load script: file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-script.js",
+              "severity": "warning",
+              "category": "assets",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186840672,
+              "details": "{\n  \"url\": \"file:///Volumes/LizsDisk/repro-in-a-box/nonexistent-script.js\",\n  \"resourceType\": \"script\",\n  \"errorText\": \"net::ERR_FILE_NOT_FOUND\",\n  \"method\": \"GET\"\n}"
+            }
+          ]
+        },
+        {
+          "detector": "accessibility",
+          "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+          "startTime": 1771186840621,
+          "endTime": 1771186843416,
+          "duration": 2795,
+          "issues": []
+        },
+        {
+          "detector": "web-vitals",
+          "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+          "startTime": 1771186840621,
+          "endTime": 1771186843416,
+          "duration": 2795,
+          "issues": []
+        },
+        {
+          "detector": "mixed-content",
+          "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+          "startTime": 1771186840621,
+          "endTime": 1771186843416,
+          "duration": 2795,
+          "issues": []
+        },
+        {
+          "detector": "broken-links",
+          "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+          "startTime": 1771186840621,
+          "endTime": 1771186843416,
+          "duration": 2795,
+          "issues": [
+            {
+              "type": "broken-link-unreachable",
+              "message": "Unreachable link: \"Link to 404 page\" → https://httpstat.us/404",
+              "severity": "error",
+              "category": "links",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186843225,
+              "details": "{\n  \"linkText\": \"Link to 404 page\",\n  \"linkUrl\": \"https://httpstat.us/404\",\n  \"error\": \"apiRequestContext.head: socket hang up\\nCall log:\\n\\u001b[2m  - → HEAD https://httpstat.us/404\\u001b[22m\\n\\u001b[2m    - user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/133.0.6943.16 Safari/537.36\\u001b[22m\\n\\u001b[2m    - accept: */*\\u001b[22m\\n\\u001b[2m    - accept-encoding: gzip,deflate,br\\u001b[22m\\n\"\n}"
+            },
+            {
+              "type": "broken-link-unreachable",
+              "message": "Unreachable link: \"Link to 500 error\" → https://httpstat.us/500",
+              "severity": "error",
+              "category": "links",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186843377,
+              "details": "{\n  \"linkText\": \"Link to 500 error\",\n  \"linkUrl\": \"https://httpstat.us/500\",\n  \"error\": \"apiRequestContext.head: socket hang up\\nCall log:\\n\\u001b[2m  - → HEAD https://httpstat.us/500\\u001b[22m\\n\\u001b[2m    - user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/133.0.6943.16 Safari/537.36\\u001b[22m\\n\\u001b[2m    - accept: */*\\u001b[22m\\n\\u001b[2m    - accept-encoding: gzip,deflate,br\\u001b[22m\\n\"\n}"
+            },
+            {
+              "type": "broken-link-unreachable",
+              "message": "Unreachable link: \"Dead link\" → https://this-domain-does-not-exist-12345.com/",
+              "severity": "error",
+              "category": "links",
+              "url": "file:///Volumes/LizsDisk/repro-in-a-box/test-page-comprehensive.html",
+              "timestamp": 1771186843416,
+              "details": "{\n  \"linkText\": \"Dead link\",\n  \"linkUrl\": \"https://this-domain-does-not-exist-12345.com/\",\n  \"error\": \"apiRequestContext.head: getaddrinfo ENOTFOUND this-domain-does-not-exist-12345.com\\nCall log:\\n\\u001b[2m  - → HEAD https://this-domain-does-not-exist-12345.com/\\u001b[22m\\n\\u001b[2m    - user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/133.0.6943.16 Safari/537.36\\u001b[22m\\n\\u001b[2m    - accept: */*\\u001b[22m\\n\\u001b[2m    - accept-encoding: gzip,deflate,br\\u001b[22m\\n\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalPages": 1,
+    "totalIssues": 18,
+    "issuesByCategory": {
+      "javascript": 9,
+      "network": 3,
+      "assets": 3,
+      "links": 3
+    },
+    "issuesBySeverity": {
+      "warning": 9,
+      "error": 9
+    }
+  }
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Page with Errors</title>
+  
+  <!-- Broken stylesheet -->
+  <link rel="stylesheet" href="nonexistent.css">
+  
+  <!-- Broken script -->
+  <script src="nonexistent.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    h1 { color: #333; }
+    .issue { 
+      background: #f0f0f0; 
+      padding: 15px; 
+      margin: 10px 0; 
+      border-left: 4px solid #ff6b6b;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test Page with Intentional Errors</h1>
+  
+  <p>This page contains intentional errors for testing Repro-in-a-Box detectors:</p>
+  
+  <div class="issue">
+    <strong>Broken Image:</strong>
+    <img src="broken-image.png" alt="This won't load">
+  </div>
+  
+  <div class="issue">
+    <strong>Broken Font:</strong>
+    <style>@font-face { font-family: 'BrokenFont'; src: url('broken-font.woff2'); }</style>
+  </div>
+  
+  <div class="issue">
+    <strong>Console Error:</strong>
+    <script>console.error('Test console error');</script>
+  </div>
+  
+  <div class="issue">
+    <strong>JavaScript Exception:</strong>
+    <script>
+      setTimeout(() => {
+        throw new Error('Test uncaught exception');
+      }, 100);
+    </script>
+  </div>
+  
+  <div class="issue">
+    <strong>Unhandled Promise Rejection:</strong>
+    <script>
+      setTimeout(() => {
+        Promise.reject(new Error('Test unhandled rejection'));
+      }, 200);
+    </script>
+  </div>
+  
+  <div class="issue">
+    <strong>Failed Fetch:</strong>
+    <script>
+      setTimeout(() => {
+        fetch('/nonexistent-api-endpoint')
+          .catch(err => console.error('Fetch failed:', err));
+      }, 300);
+    </script>
+  </div>
+  
+  <p>
+    <a href="page2.html">Link to another test page</a> |
+    <a href="https://example.com">External link</a>
+  </p>
+</body>
+</html>

@@ -1,0 +1,125 @@
+{
+  "config": {
+    "url": "https://github.com",
+    "headless": true,
+    "crawler": {
+      "maxDepth": 1,
+      "maxPages": 3,
+      "rateLimitMs": 1000,
+      "sameDomain": true
+    }
+  },
+  "startTime": 1771186432721,
+  "endTime": 1771186438018,
+  "duration": 5297,
+  "pages": [
+    {
+      "page": {
+        "url": "https://github.com/",
+        "depth": 0,
+        "statusCode": 200,
+        "timestamp": 1771186434114
+      },
+      "detectors": [
+        {
+          "detector": "js-errors",
+          "url": "https://github.com/",
+          "startTime": 1771186434120,
+          "endTime": 1771186434123,
+          "duration": 3,
+          "issues": []
+        },
+        {
+          "detector": "network-errors",
+          "url": "https://github.com/",
+          "startTime": 1771186434120,
+          "endTime": 1771186434123,
+          "duration": 3,
+          "issues": []
+        },
+        {
+          "detector": "broken-assets",
+          "url": "https://github.com/",
+          "startTime": 1771186434120,
+          "endTime": 1771186434123,
+          "duration": 3,
+          "issues": []
+        }
+      ]
+    },
+    {
+      "page": {
+        "url": "https://github.com/login",
+        "depth": 1,
+        "statusCode": 200,
+        "timestamp": 1771186435938
+      },
+      "detectors": [
+        {
+          "detector": "js-errors",
+          "url": "https://github.com/login",
+          "startTime": 1771186435939,
+          "endTime": 1771186435944,
+          "duration": 5,
+          "issues": []
+        },
+        {
+          "detector": "network-errors",
+          "url": "https://github.com/login",
+          "startTime": 1771186435939,
+          "endTime": 1771186435944,
+          "duration": 5,
+          "issues": []
+        },
+        {
+          "detector": "broken-assets",
+          "url": "https://github.com/login",
+          "startTime": 1771186435939,
+          "endTime": 1771186435944,
+          "duration": 5,
+          "issues": []
+        }
+      ]
+    },
+    {
+      "page": {
+        "url": "https://github.com/features/copilot",
+        "depth": 1,
+        "statusCode": 200,
+        "timestamp": 1771186438016
+      },
+      "detectors": [
+        {
+          "detector": "js-errors",
+          "url": "https://github.com/features/copilot",
+          "startTime": 1771186438016,
+          "endTime": 1771186438018,
+          "duration": 2,
+          "issues": []
+        },
+        {
+          "detector": "network-errors",
+          "url": "https://github.com/features/copilot",
+          "startTime": 1771186438016,
+          "endTime": 1771186438018,
+          "duration": 2,
+          "issues": []
+        },
+        {
+          "detector": "broken-assets",
+          "url": "https://github.com/features/copilot",
+          "startTime": 1771186438016,
+          "endTime": 1771186438018,
+          "duration": 2,
+          "issues": []
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalPages": 3,
+    "totalIssues": 0,
+    "issuesByCategory": {},
+    "issuesBySeverity": {}
+  }
+}
