@@ -1,6 +1,8 @@
-import { chromium, type Browser, type Page } from '@playwright/test';
+import { chromium, type Browser, type Page, type BrowserContext } from '@playwright/test';
 import { DetectorRegistry, type DetectorResult } from '../detectors/index.js';
 import { Crawler, type CrawlerConfig, type CrawledPage } from '../crawler/index.js';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 /**
  * Configuration for scanner
@@ -16,19 +18,49 @@ export interface ScanConfig {
   outputDir?: string;
   /** Whether to capture screenshots on errors */
   screenshots?: boolean;
+  /** Whether to record HAR file */
+  recordHar?: boolean;
+  /** Path to save HAR file */
+  harPath?: string;
 }
 
 /**
  * Result from scanning a single page
  */
 export interface PageScanResult {
-  page: CrawledPage;
-  detectors: DetectorResult[];
+  url: string;
+  depth: number;
+  detectorResults: DetectorResult[];
+  summary: {
+    totalIssues: number;
+    byCategory: Record<string, number>;
+    bySeverity: Record<string, number>;
+  };
+  screenshotPath?: string;
+  harPath?: string;
   error?: string;
 }
 
 /**
- * Complete scan result
+ * Complete scan results (matches bundler interface)
+ */
+export interface ScanResults {
+  timestamp: string;
+  url: string;
+  config: ScanConfig;
+  pages: PageScanResult[];
+  summary: {
+    pagesScanned: number;
+    totalIssues: number;
+    duration: string;
+    byCategory: Record<string, number>;
+    bySeverity: Record<string, number>;
+  };
+  harPath?: string;
+}
+
+/**
+ * Legacy ScanResult interface (deprecated, use ScanResults)
  */
 export interface ScanResult {
   config: ScanConfig;
@@ -50,7 +82,10 @@ export interface ScanResult {
 export class Scanner {
   private registry: DetectorRegistry;
   private browser?: Browser;
+  private context?: BrowserContext;
   private page?: Page;
+  private config?: ScanConfig;
+  private screenshotCounter = 0;
   
   constructor(registry: DetectorRegistry) {
     this.registry = registry;
@@ -59,9 +94,26 @@ export class Scanner {
   /**
    * Initialize browser and page
    */
-  private async init(headless: boolean = true): Promise<void> {
-    this.browser = await chromium.launch({ headless });
-    this.page = await this.browser.newPage();
+  private async init(config: ScanConfig): Promise<void> {
+    this.config = config;
+    this.browser = await chromium.launch({ headless: config.headless ?? true });
+    
+    // Create context with HAR recording if enabled
+    const contextOptions: any = {};
+    
+    if (config.recordHar && config.harPath) {
+      // Ensure output directory exists
+      const harDir = path.dirname(config.harPath);
+      await fs.mkdir(harDir, { recursive: true });
+      
+      contextOptions.recordHar = {
+        path: config.harPath,
+        mode: 'minimal', // or 'full' for complete recording
+      };
+    }
+    
+    this.context = await this.browser.newContext(contextOptions);
+    this.page = await this.context.newPage();
   }
   
   /**
@@ -72,9 +124,45 @@ export class Scanner {
       await this.page.close();
       this.page = undefined;
     }
+    if (this.context) {
+      await this.context.close();
+      this.context = undefined;
+    }
     if (this.browser) {
       await this.browser.close();
       this.browser = undefined;
+    }
+  }
+  
+  /**
+   * Capture screenshot if config.screenshots is enabled
+   */
+  private async captureScreenshot(page: Page, url: string): Promise<string | undefined> {
+    if (!this.config?.screenshots || !this.config?.outputDir) {
+      return undefined;
+    }
+    
+    try {
+      const screenshotsDir = path.join(this.config.outputDir, 'screenshots');
+      await fs.mkdir(screenshotsDir, { recursive: true });
+      
+      // Sanitize URL for filename
+      const sanitized = url
+        .replace(/^https?:\/\//, '')
+        .replace(/[^a-z0-9-]/gi, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 50);
+      
+      this.screenshotCounter++;
+      const filename = `${this.screenshotCounter}-${sanitized}.png`;
+      const screenshotPath = path.join(screenshotsDir, filename);
+      
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      return screenshotPath;
+    } catch (error) {
+      console.warn(`⚠️  Failed to capture screenshot: ${error}`);
+      return undefined;
     }
   }
   
@@ -83,7 +171,9 @@ export class Scanner {
    */
   private async scanPage(page: Page, crawledPage: CrawledPage): Promise<PageScanResult> {
     const detectors = this.registry.getEnabled();
-    const results: DetectorResult[] = [];
+    const detectorResults: DetectorResult[] = [];
+    let error: string | undefined;
+    let screenshotPath: string | undefined;
     
     try {
       // Page is already navigated by crawler
@@ -100,18 +190,51 @@ export class Scanner {
       // Collect results from all detectors
       for (const detector of detectors) {
         const result = await detector.collect(page);
-        results.push(result);
+        detectorResults.push(result);
+      }
+      
+      // Calculate totals for this page
+      let totalIssues = 0;
+      const byCategory: Record<string, number> = {};
+      const bySeverity: Record<string, number> = {};
+      
+      for (const result of detectorResults) {
+        for (const issue of result.issues) {
+          totalIssues++;
+          byCategory[issue.category] = (byCategory[issue.category] || 0) + 1;
+          bySeverity[issue.severity] = (bySeverity[issue.severity] || 0) + 1;
+        }
+      }
+      
+      // Capture screenshot if issues were found and screenshots are enabled
+      if (totalIssues > 0 && this.config?.screenshots) {
+        screenshotPath = await this.captureScreenshot(page, crawledPage.url);
       }
       
       return {
-        page: crawledPage,
-        detectors: results,
+        url: crawledPage.url,
+        depth: crawledPage.depth,
+        detectorResults,
+        summary: {
+          totalIssues,
+          byCategory,
+          bySeverity,
+        },
+        screenshotPath,
       };
-    } catch (error) {
+    } catch (err) {
+      error = err instanceof Error ? err.message : String(err);
+      
       return {
-        page: crawledPage,
-        detectors: results,
-        error: error instanceof Error ? error.message : String(error),
+        url: crawledPage.url,
+        depth: crawledPage.depth,
+        detectorResults,
+        summary: {
+          totalIssues: 0,
+          byCategory: {},
+          bySeverity: {},
+        },
+        error,
       };
     }
   }
@@ -119,13 +242,13 @@ export class Scanner {
   /**
    * Run a complete scan
    */
-  async scan(config: ScanConfig): Promise<ScanResult> {
+  async scan(config: ScanConfig): Promise<ScanResults> {
     const startTime = Date.now();
     const pages: PageScanResult[] = [];
     
     try {
-      // Initialize browser
-      await this.init(config.headless ?? true);
+      // Initialize browser with config
+      await this.init(config);
       
       if (!this.page) {
         throw new Error('Failed to initialize browser page');
@@ -154,9 +277,8 @@ export class Scanner {
         pages.push(result);
         
         // Log issues found
-        const totalIssues = result.detectors.reduce((sum, d) => sum + d.issues.length, 0);
-        if (totalIssues > 0) {
-          console.log(`  ⚠️  Found ${totalIssues} issue(s)`);
+        if (result.summary.totalIssues > 0) {
+          console.log(`  ⚠️  Found ${result.summary.totalIssues} issue(s)`);
         } else {
           console.log(`  ✅ No issues found`);
         }
@@ -168,17 +290,18 @@ export class Scanner {
       }
       
       const endTime = Date.now();
+      const duration = endTime - startTime;
       
       // Calculate summary
-      const summary = this.calculateSummary(pages);
+      const summary = this.calculateSummary(pages, duration);
       
       return {
+        timestamp: new Date(startTime).toISOString(),
+        url: config.url,
         config,
-        startTime,
-        endTime,
-        duration: endTime - startTime,
         pages,
         summary,
+        harPath: config.harPath,
       };
     } finally {
       await this.cleanup();
@@ -188,30 +311,33 @@ export class Scanner {
   /**
    * Calculate summary statistics
    */
-  private calculateSummary(pages: PageScanResult[]) {
+  private calculateSummary(pages: PageScanResult[], duration: number) {
     let totalIssues = 0;
-    const issuesByCategory: Record<string, number> = {};
-    const issuesBySeverity: Record<string, number> = {};
+    const byCategory: Record<string, number> = {};
+    const bySeverity: Record<string, number> = {};
     
-    for (const pageResult of pages) {
-      for (const detectorResult of pageResult.detectors) {
-        for (const issue of detectorResult.issues) {
-          totalIssues++;
-          
-          // Count by category
-          issuesByCategory[issue.category] = (issuesByCategory[issue.category] || 0) + 1;
-          
-          // Count by severity
-          issuesBySeverity[issue.severity] = (issuesBySeverity[issue.severity] || 0) + 1;
-        }
+    for (const page of pages) {
+      totalIssues += page.summary.totalIssues;
+      
+      for (const [category, count] of Object.entries(page.summary.byCategory)) {
+        byCategory[category] = (byCategory[category] || 0) + count;
+      }
+      
+      for (const [severity, count] of Object.entries(page.summary.bySeverity)) {
+        bySeverity[severity] = (bySeverity[severity] || 0) + count;
       }
     }
     
+    // Format duration as human-readable string
+    const seconds = (duration / 1000).toFixed(2);
+    const durationStr = `${seconds}s`;
+    
     return {
-      totalPages: pages.length,
+      pagesScanned: pages.length,
       totalIssues,
-      issuesByCategory,
-      issuesBySeverity,
+      duration: durationStr,
+      byCategory,
+      bySeverity,
     };
   }
 }

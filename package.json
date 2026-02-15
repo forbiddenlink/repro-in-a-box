@@ -25,6 +25,8 @@
   "license": "MIT",
   "dependencies": {
     "@axe-core/playwright": "^4.11.1",
+    "@types/adm-zip": "^0.5.7",
+    "adm-zip": "^0.5.16",
     "axe-playwright": "^2.2.2",
     "commander": "^12.1.0",
     "inquirer": "^9.3.8",
