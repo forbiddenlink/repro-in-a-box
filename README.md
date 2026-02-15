@@ -361,12 +361,40 @@ Issues by category:
 - [x] `diff_scans` tool
 - [x] Claude Desktop integration
 
-### 🚧 Week 6: Polish (In Progress)
-- [x] Unit tests (15 tests passing)
-- [x] Vitest configuration
-- [ ] Integration tests
-- [ ] Comprehensive documentation
-- [ ] npm publish
+### ✅ Week 6: Polish & Testing (Complete - v2.5.0)
+- [x] 112+ comprehensive tests (5x increase)
+- [x] ~85% code coverage across all modules
+- [x] Performance benchmarks established
+- [x] Security vulnerabilities fixed
+- [x] npm published successfully
+
+### 🎯 Future Enhancements (v2.6+)
+
+**Developer Experience:**
+- Interactive setup wizard (`repro init`)
+- Configuration file support (`.reprorc.json`)
+- Multiple output formats (JSON, CSV, GitHub Actions)
+- Custom detector plugins API
+
+**New Detectors:**
+- SEO detector (meta tags, Open Graph, structured data)
+- Performance detector (bundle size, render blocking resources)
+- Security detector (CSP violations, mixed content warnings)
+- Console warnings (separate from errors)
+- Memory leak detection
+
+**Advanced Features:**
+- HTML report generator with charts
+- GitHub Action for CI/CD integration
+- Historical trending and comparison
+- Scheduled scanning (cron-like)
+- Webhook notifications (Slack, Discord)
+
+**UI/Visualization:**
+- Web dashboard for scan results
+- Browser extension for one-click scanning
+- Interactive issue explorer
+- Visual diff comparison
 
 ## 🏗️ Architecture
 
