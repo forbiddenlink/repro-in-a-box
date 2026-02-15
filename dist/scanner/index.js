@@ -1,21 +1,39 @@
 import { chromium } from '@playwright/test';
 import { Crawler } from '../crawler/index.js';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 /**
  * Scanner that orchestrates crawling and detection
  */
 export class Scanner {
     registry;
     browser;
+    context;
     page;
+    config;
+    screenshotCounter = 0;
     constructor(registry) {
         this.registry = registry;
     }
     /**
      * Initialize browser and page
      */
-    async init(headless = true) {
-        this.browser = await chromium.launch({ headless });
-        this.page = await this.browser.newPage();
+    async init(config) {
+        this.config = config;
+        this.browser = await chromium.launch({ headless: config.headless ?? true });
+        // Create context with HAR recording if enabled
+        const contextOptions = {};
+        if (config.recordHar && config.harPath) {
+            // Ensure output directory exists
+            const harDir = path.dirname(config.harPath);
+            await fs.mkdir(harDir, { recursive: true });
+            contextOptions.recordHar = {
+                path: config.harPath,
+                mode: 'minimal', // or 'full' for complete recording
+            };
+        }
+        this.context = await this.browser.newContext(contextOptions);
+        this.page = await this.context.newPage();
     }
     /**
      * Cleanup browser resources
@@ -25,9 +43,41 @@ export class Scanner {
             await this.page.close();
             this.page = undefined;
         }
+        if (this.context) {
+            await this.context.close();
+            this.context = undefined;
+        }
         if (this.browser) {
             await this.browser.close();
             this.browser = undefined;
+        }
+    }
+    /**
+     * Capture screenshot if config.screenshots is enabled
+     */
+    async captureScreenshot(page, url) {
+        if (!this.config?.screenshots || !this.config?.outputDir) {
+            return undefined;
+        }
+        try {
+            const screenshotsDir = path.join(this.config.outputDir, 'screenshots');
+            await fs.mkdir(screenshotsDir, { recursive: true });
+            // Sanitize URL for filename
+            const sanitized = url
+                .replace(/^https?:\/\//, '')
+                .replace(/[^a-z0-9-]/gi, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '')
+                .substring(0, 50);
+            this.screenshotCounter++;
+            const filename = `${this.screenshotCounter}-${sanitized}.png`;
+            const screenshotPath = path.join(screenshotsDir, filename);
+            await page.screenshot({ path: screenshotPath, fullPage: true });
+            return screenshotPath;
+        }
+        catch (error) {
+            console.warn(`⚠️  Failed to capture screenshot: ${error}`);
+            return undefined;
         }
     }
     /**
@@ -35,7 +85,9 @@ export class Scanner {
      */
     async scanPage(page, crawledPage) {
         const detectors = this.registry.getEnabled();
-        const results = [];
+        const detectorResults = [];
+        let error;
+        let screenshotPath;
         try {
             // Page is already navigated by crawler
             // Wait a bit for async errors to occur
@@ -49,18 +101,47 @@ export class Scanner {
             // Collect results from all detectors
             for (const detector of detectors) {
                 const result = await detector.collect(page);
-                results.push(result);
+                detectorResults.push(result);
+            }
+            // Calculate totals for this page
+            let totalIssues = 0;
+            const byCategory = {};
+            const bySeverity = {};
+            for (const result of detectorResults) {
+                for (const issue of result.issues) {
+                    totalIssues++;
+                    byCategory[issue.category] = (byCategory[issue.category] || 0) + 1;
+                    bySeverity[issue.severity] = (bySeverity[issue.severity] || 0) + 1;
+                }
+            }
+            // Capture screenshot if issues were found and screenshots are enabled
+            if (totalIssues > 0 && this.config?.screenshots) {
+                screenshotPath = await this.captureScreenshot(page, crawledPage.url);
             }
             return {
-                page: crawledPage,
-                detectors: results,
+                url: crawledPage.url,
+                depth: crawledPage.depth,
+                detectorResults,
+                summary: {
+                    totalIssues,
+                    byCategory,
+                    bySeverity,
+                },
+                screenshotPath,
             };
         }
-        catch (error) {
+        catch (err) {
+            error = err instanceof Error ? err.message : String(err);
             return {
-                page: crawledPage,
-                detectors: results,
-                error: error instanceof Error ? error.message : String(error),
+                url: crawledPage.url,
+                depth: crawledPage.depth,
+                detectorResults,
+                summary: {
+                    totalIssues: 0,
+                    byCategory: {},
+                    bySeverity: {},
+                },
+                error,
             };
         }
     }
@@ -71,8 +152,8 @@ export class Scanner {
         const startTime = Date.now();
         const pages = [];
         try {
-            // Initialize browser
-            await this.init(config.headless ?? true);
+            // Initialize browser with config
+            await this.init(config);
             if (!this.page) {
                 throw new Error('Failed to initialize browser page');
             }
@@ -94,9 +175,8 @@ export class Scanner {
                 const result = await this.scanPage(this.page, crawledPage);
                 pages.push(result);
                 // Log issues found
-                const totalIssues = result.detectors.reduce((sum, d) => sum + d.issues.length, 0);
-                if (totalIssues > 0) {
-                    console.log(`  ⚠️  Found ${totalIssues} issue(s)`);
+                if (result.summary.totalIssues > 0) {
+                    console.log(`  ⚠️  Found ${result.summary.totalIssues} issue(s)`);
                 }
                 else {
                     console.log(`  ✅ No issues found`);
@@ -107,15 +187,16 @@ export class Scanner {
                 await detector.cleanup?.();
             }
             const endTime = Date.now();
+            const duration = endTime - startTime;
             // Calculate summary
-            const summary = this.calculateSummary(pages);
+            const summary = this.calculateSummary(pages, duration);
             return {
+                timestamp: new Date(startTime).toISOString(),
+                url: config.url,
                 config,
-                startTime,
-                endTime,
-                duration: endTime - startTime,
                 pages,
                 summary,
+                harPath: config.harPath,
             };
         }
         finally {
@@ -125,26 +206,28 @@ export class Scanner {
     /**
      * Calculate summary statistics
      */
-    calculateSummary(pages) {
+    calculateSummary(pages, duration) {
         let totalIssues = 0;
-        const issuesByCategory = {};
-        const issuesBySeverity = {};
-        for (const pageResult of pages) {
-            for (const detectorResult of pageResult.detectors) {
-                for (const issue of detectorResult.issues) {
-                    totalIssues++;
-                    // Count by category
-                    issuesByCategory[issue.category] = (issuesByCategory[issue.category] || 0) + 1;
-                    // Count by severity
-                    issuesBySeverity[issue.severity] = (issuesBySeverity[issue.severity] || 0) + 1;
-                }
+        const byCategory = {};
+        const bySeverity = {};
+        for (const page of pages) {
+            totalIssues += page.summary.totalIssues;
+            for (const [category, count] of Object.entries(page.summary.byCategory)) {
+                byCategory[category] = (byCategory[category] || 0) + count;
+            }
+            for (const [severity, count] of Object.entries(page.summary.bySeverity)) {
+                bySeverity[severity] = (bySeverity[severity] || 0) + count;
             }
         }
+        // Format duration as human-readable string
+        const seconds = (duration / 1000).toFixed(2);
+        const durationStr = `${seconds}s`;
         return {
-            totalPages: pages.length,
+            pagesScanned: pages.length,
             totalIssues,
-            issuesByCategory,
-            issuesBySeverity,
+            duration: durationStr,
+            byCategory,
+            bySeverity,
         };
     }
 }

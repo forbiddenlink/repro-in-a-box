@@ -40,6 +40,7 @@
     "@playwright/test": "^1.50.0",
     "@types/inquirer": "^9.0.9",
     "@types/node": "^20.19.33",
+    "@vitest/ui": "^1.6.1",
     "typescript": "^5.9.3",
     "vitest": "^1.6.1"
   }

@@ -1,1 +1,1 @@
-{"version":3,"file":"scan.d.ts","sourceRoot":"","sources":["../../../src/cli/commands/scan.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AAepC,eAAO,MAAM,WAAW,SA2GpB,CAAC"}
+{"version":3,"file":"scan.d.ts","sourceRoot":"","sources":["../../../src/cli/commands/scan.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,MAAM,WAAW,CAAC;AAgBpC,eAAO,MAAM,WAAW,SA6IpB,CAAC"}
