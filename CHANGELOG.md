@@ -5,6 +5,20 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-02-15
+
+### 🐛 Critical Bug Fix
+
+#### Fixed
+- **Missing Runtime Dependency**: Moved `@playwright/test` from devDependencies to dependencies
+  - Package was broken on install due to missing peer dependency
+  - All source files import from `@playwright/test` for Page, Browser types
+  - This fix makes the package actually work when installed via npm
+
+**Impact**: v2.5.0 was non-functional when installed. All users should upgrade to v2.5.1 immediately.
+
+---
+
 ## [2.5.0] - 2026-02-15
 
 ### 🎉 Major Release: Production-Grade Testing & Quality

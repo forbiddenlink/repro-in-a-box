@@ -1,6 +1,6 @@
 {
   "name": "repro-in-a-box",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Production-grade automated bug detection, reproduction, and validation tool with 112+ tests. Find bugs with Playwright, record HAR files, validate reproducibility, and integrate with Claude Desktop.",
   "type": "module",
   "main": "dist/cli/index.js",
@@ -39,6 +39,7 @@
   "dependencies": {
     "@axe-core/playwright": "^4.11.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
+    "@playwright/test": "^1.50.0",
     "@types/adm-zip": "^0.5.7",
     "adm-zip": "^0.5.16",
     "axe-playwright": "^2.2.2",
@@ -50,7 +51,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@playwright/test": "^1.50.0",
     "@types/inquirer": "^9.0.9",
     "@types/node": "^20.19.33",
     "@vitest/coverage-v8": "^1.6.1",
