@@ -23,21 +23,21 @@ describe('CLI Commands - Scan', () => {
       const option = scanCommand.options.find(o => o.long === '--max-depth');
       expect(option).toBeDefined();
       expect(option?.description).toContain('Maximum crawl depth');
-      expect(option?.defaultValue).toBe('2');
+      // No default value - comes from config system
     });
 
     it('should have max-pages option', () => {
       const option = scanCommand.options.find(o => o.long === '--max-pages');
       expect(option).toBeDefined();
       expect(option?.description).toContain('Maximum pages');
-      expect(option?.defaultValue).toBe('10');
+      // No default value - comes from config system
     });
 
     it('should have rate-limit option', () => {
       const option = scanCommand.options.find(o => o.long === '--rate-limit');
       expect(option).toBeDefined();
       expect(option?.description).toContain('Rate limit');
-      expect(option?.defaultValue).toBe('1000');
+      // No default value - comes from config system
     });
 
     it('should have output option', () => {

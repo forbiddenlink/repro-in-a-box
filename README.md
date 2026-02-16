@@ -5,14 +5,14 @@
 Autonomous QA agent that finds bugs on your site, captures reproducible evidence (HAR files + screenshots), validates reproducibility, and provides Claude Desktop integration via MCP.
 
 [![Version](https://img.shields.io/badge/version-2.6.0-blue)](https://github.com/forbiddenlink/repro-in-a-box)
-[![Tests](https://img.shields.io/badge/tests-111+-green)]()
+[![Tests](https://img.shields.io/badge/tests-119-green)]()
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ## ✨ Features
 
 - **7 Built-in Detectors**: JavaScript errors, network failures, broken assets, accessibility (WCAG 2.1), web vitals, mixed content, broken links
-- **Production-Grade Testing**: 112+ tests across 7 test files, ~85% code coverage
+- **Production-Grade Testing**: 119 tests across 9 test files, ~85% code coverage
 - **Performance Benchmarked**: <100ms detector attach, <500ms collect, <1s for 100 issues
 - **Multi-Page Crawler**: Configurable depth, rate limiting, same-domain filtering
 - **Auto-Bundling**: Creates reproducible ZIP packages with HAR files and screenshots
@@ -611,7 +611,7 @@ Issues by category:
 - [x] Claude Desktop integration
 
 ### ✅ Week 6: Polish & Testing (Complete - v2.5.0)
-- [x] 112+ comprehensive tests (5x increase)
+- [x] 119 comprehensive tests (5x increase)
 - [x] ~85% code coverage across all modules
 - [x] Performance benchmarks established
 - [x] Security vulnerabilities fixed
@@ -689,7 +689,7 @@ npm run dev -- scan https://example.com
 # Build TypeScript
 npm run build
 
-# Run tests (112+ tests)
+# Run tests (119 tests)
 npm test
 
 # Run tests with coverage
@@ -708,8 +708,8 @@ npx tsc --noEmit
 ### Test Coverage
 
 **v2.5.0 Test Suite:**
-- 7 test files, 1,397 lines of test code
-- 112+ tests across all modules
+- 9 test files, 1,397 lines of test code
+- 119 tests across all modules
 - ~85% code coverage
 - Performance benchmarks included
 
@@ -737,7 +737,7 @@ MIT © 2026
 ---
 
 **Current Version**: 2.5.0 🚀  
-**Test Coverage**: 112+ tests, ~85% coverage  
+**Test Coverage**: 119 tests, ~85% coverage  
 **Status**: Production-ready  
 **Status**: Week 6 in progress - Final polish before v2.0.0 release  
 **Tests**: 15/15 passing ✅

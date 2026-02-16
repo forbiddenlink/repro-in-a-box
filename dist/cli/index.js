@@ -7,11 +7,15 @@ import { Command } from 'commander';
 import { scanCommand } from './commands/scan.js';
 import { validateCommand } from './commands/validate.js';
 import { diffCommand } from './commands/diff.js';
+import { initCommand } from './commands/init.js';
+import { VERSION } from './version.js';
 const program = new Command();
 program
     .name('repro')
     .description('Find bugs. Freeze them. Ship them.')
-    .version('2.0.0');
+    .version(VERSION);
+// Init command: Interactive config wizard
+program.addCommand(initCommand);
 // Scan command: Detect issues on a site
 program.addCommand(scanCommand);
 // Validate command: Verify reproducibility via HAR replay
