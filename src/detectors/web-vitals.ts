@@ -36,73 +36,65 @@ export class WebVitalsDetector extends BaseDetector {
   
   async scan(page: Page, _config?: DetectorConfig): Promise<Issue[]> {
     try {
-      // Inject and run web-vitals library
-      const metrics = await page.evaluate(async () => {
-        // Import web-vitals from CDN
-        // @ts-expect-error - Dynamic import from CDN
-        const module = await import('https://unpkg.com/web-vitals@4?module');
-        
-        const collectedMetrics: any[] = [];
-        
-        // Collect CLS (Cumulative Layout Shift)
-        module.onCLS((metric: any) => {
-          collectedMetrics.push({
-            name: 'CLS',
-            value: metric.value,
-            rating: metric.rating,
-            delta: metric.delta,
-            id: metric.id
-          });
+      // Inject and run web-vitals library using a script tag approach
+      // This avoids Vite's dynamic import issues in test environments
+      const metrics = await page.evaluate(() => {
+        return new Promise<any[]>((resolve) => {
+          const collectedMetrics: any[] = [];
+          
+          // @ts-expect-error - document and window are available in browser context
+          const script = document.createElement('script');
+          script.type = 'module';
+          script.textContent = `
+            import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
+            
+            const metrics = [];
+            
+            onCLS((metric) => {
+              metrics.push({ name: 'CLS', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
+              window.__webVitalsReady = metrics;
+            });
+            
+            onINP((metric) => {
+              metrics.push({ name: 'INP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
+              window.__webVitalsReady = metrics;
+            });
+            
+            onLCP((metric) => {
+              metrics.push({ name: 'LCP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
+              window.__webVitalsReady = metrics;
+            });
+            
+            onFCP((metric) => {
+              metrics.push({ name: 'FCP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
+              window.__webVitalsReady = metrics;
+            });
+            
+            onTTFB((metric) => {
+              metrics.push({ name: 'TTFB', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
+              window.__webVitalsReady = metrics;
+            });
+          `;
+          
+          // @ts-expect-error - document is available in browser context
+          document.head.appendChild(script);
+          
+          // Wait for metrics to be collected
+          const checkInterval = setInterval(() => {
+            // @ts-expect-error - window is available in browser context
+            if (window.__webVitalsReady) {
+              clearInterval(checkInterval);
+              // @ts-expect-error - window is available in browser context
+              resolve(window.__webVitalsReady);
+            }
+          }, 100);
+          
+          // Timeout after 2 seconds
+          setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(collectedMetrics);
+          }, 2000);
         });
-        
-        // Collect INP (Interaction to Next Paint)
-        module.onINP((metric: any) => {
-          collectedMetrics.push({
-            name: 'INP',
-            value: metric.value,
-            rating: metric.rating,
-            delta: metric.delta,
-            id: metric.id
-          });
-        });
-        
-        // Collect LCP (Largest Contentful Paint)
-        module.onLCP((metric: any) => {
-          collectedMetrics.push({
-            name: 'LCP',
-            value: metric.value,
-            rating: metric.rating,
-            delta: metric.delta,
-            id: metric.id
-          });
-        });
-        
-        // Collect FCP (First Contentful Paint)
-        module.onFCP((metric: any) => {
-          collectedMetrics.push({
-            name: 'FCP',
-            value: metric.value,
-            rating: metric.rating,
-            delta: metric.delta,
-            id: metric.id
-          });
-        });
-        
-        // Collect TTFB (Time to First Byte)
-        module.onTTFB((metric: any) => {
-          collectedMetrics.push({
-            name: 'TTFB',
-            value: metric.value,
-            rating: metric.rating,
-            delta: metric.delta,
-            id: metric.id
-          });
-        });
-        
-        // Wait a bit for metrics to be collected
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        return collectedMetrics;
       });
       
       this.metrics = metrics as WebVitalsMetric[];
