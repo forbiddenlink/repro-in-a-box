@@ -1,6 +1,7 @@
 # Codacy AI rules
 # This file is auto-generated and should not be tracked in version control
 .github/instructions/codacy.instructions.md
+.codacy/
 
 # Dependencies
 node_modules/
