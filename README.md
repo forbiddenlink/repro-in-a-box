@@ -1,11 +1,11 @@
-# Repro-in-a-Box v2.5 🎁
+# Repro-in-a-Box v2.6 🎁
 
 **Find bugs. Freeze them. Ship them.**
 
 Autonomous QA agent that finds bugs on your site, captures reproducible evidence (HAR files + screenshots), validates reproducibility, and provides Claude Desktop integration via MCP.
 
-[![Version](https://img.shields.io/badge/version-2.5.0-blue)](https://github.com/forbiddenlink/repro-in-a-box)
-[![Tests](https://img.shields.io/badge/tests-112+-green)]()
+[![Version](https://img.shields.io/badge/version-2.6.0-blue)](https://github.com/forbiddenlink/repro-in-a-box)
+[![Tests](https://img.shields.io/badge/tests-111+-green)]()
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
@@ -28,6 +28,9 @@ npm install
 
 # Build
 npm run build
+
+# Create config file (optional but recommended)
+repro init
 
 # Scan a website and create reproducible bundle
 repro scan https://your-site.com --bundle
@@ -210,7 +213,248 @@ repro diff <baseline.json> <comparison.json>
 ```
 
 Coming soon: Full CLI implementation (currently available via MCP).
+## ⚙️ Configuration
 
+Repro-in-a-Box supports configuration files to set default values for all options. This eliminates the need to pass the same flags repeatedly.
+
+### Quick Start
+
+Create a configuration file interactively:
+
+```bash
+repro init
+```
+
+This wizard will ask you questions and generate a `.reprorc.json` file with your preferences.
+
+### Configuration Files
+
+Repro-in-a-Box searches for configuration in this order:
+
+1. `--config <path>` flag (if specified)
+2. `.reprorc.json` in current directory
+3. `.reprorc.js` in current directory (JavaScript module)
+4. `repro` field in `package.json`
+
+**Priority**: CLI flags > Config file > Defaults
+
+### Example: `.reprorc.json`
+
+```json
+{
+  "detectors": {
+    "enabled": ["javascript-errors", "network-errors", "broken-assets"],
+    "disabled": ["web-vitals"]
+  },
+  "crawler": {
+    "maxDepth": 3,
+    "maxPages": 100,
+    "rateLimit": 100,
+    "sameDomain": true,
+    "followRedirects": true
+  },
+  "browser": {
+    "headless": true,
+    "slowMo": 0,
+    "timeout": 30000
+  },
+  "output": {
+    "format": "json",
+    "path": "./repro-results",
+    "verbose": false
+  },
+  "thresholds": {
+    "minReproducibility": 70,
+    "failOn": ["error"]
+  },
+  "bundle": {
+    "enabled": true,
+    "includeScreenshots": true,
+    "includeHar": true,
+    "compression": "fast"
+  }
+}
+```
+
+### Example: `.reprorc.js` (JavaScript)
+
+```javascript
+export default {
+  crawler: {
+    maxDepth: 5,
+    maxPages: 50,
+  },
+  detectors: {
+    // Only run these detectors
+    enabled: ['javascript-errors', 'accessibility'],
+  },
+  bundle: {
+    enabled: true,
+  },
+};
+```
+
+### Example: `package.json`
+
+```json
+{
+  "name": "my-project",
+  "repro": {
+    "crawler": {
+      "maxDepth": 2,
+      "maxPages": 20
+    },
+    "bundle": {
+      "enabled": true
+    }
+  }
+}
+```
+
+### Configuration Options
+
+#### Detectors
+
+```json
+{
+  "detectors": {
+    "enabled": [
+      "javascript-errors",    // Console errors, exceptions
+      "network-errors",       // Failed HTTP requests
+      "broken-assets",        // Missing images, scripts
+      "accessibility",        // WCAG 2.1 violations
+      "web-vitals",          // Core Web Vitals
+      "mixed-content",       // HTTP on HTTPS
+      "broken-links"         // Check all links
+    ],
+    "disabled": []  // Disable specific detectors
+  }
+}
+```
+
+**Note**: If `enabled` is empty or not specified, all detectors run. Use `disabled` to exclude specific ones.
+
+#### Crawler
+
+```json
+{
+  "crawler": {
+    "maxDepth": 3,          // How many clicks deep (1-10)
+    "maxPages": 100,        // Maximum pages to scan (1-1000)
+    "rateLimit": 100,       // Delay between requests in ms (0-10000)
+    "sameDomain": true,     // Only crawl same domain
+    "followRedirects": true // Follow HTTP redirects
+  }
+}
+```
+
+#### Browser
+
+```json
+{
+  "browser": {
+    "headless": true,       // Run browser in background
+    "slowMo": 0,           // Slow down operations (ms)
+    "timeout": 30000,      // Page load timeout (ms)
+    "userAgent": "..."     // Custom user agent (optional)
+  }
+}
+```
+
+#### Output
+
+```json
+{
+  "output": {
+    "format": "json",      // json | text | csv | html
+    "path": "./repro-results",  // Output directory
+    "verbose": false,      // Detailed logging
+    "quiet": false         // Suppress output except errors
+  }
+}
+```
+
+#### Thresholds
+
+```json
+{
+  "thresholds": {
+    "minReproducibility": 70,  // Min score to pass (0-100)
+    "maxIssues": null,         // Max issues before failing
+    "failOn": ["error"]        // Fail on: error | warning | info
+  }
+}
+```
+
+#### Bundle
+
+```json
+{
+  "bundle": {
+    "enabled": false,           // Create ZIP bundles
+    "includeScreenshots": true, // Include issue screenshots
+    "includeHar": true,         // Include HAR file
+    "compression": "fast"       // none | fast | best
+  }
+}
+```
+
+### Using Configurations
+
+#### 1. With `.reprorc.json` in project
+
+```bash
+# Uses .reprorc.json settings
+repro scan https://example.com
+
+# CLI flags override config
+repro scan https://example.com --max-depth 5
+```
+
+#### 2. With custom config path
+
+```bash
+repro scan https://example.com --config ./configs/prod.json
+```
+
+#### 3. Mix and match
+
+```bash
+# Config: maxDepth=3, maxPages=100, bundle=true
+# CLI overrides maxPages to 20
+repro scan https://example.com --max-pages 20
+```
+
+### Real-World Examples
+
+**CI/CD Pipeline** (`.reprorc.json`):
+```json
+{
+  "crawler": { "maxPages": 50, "rateLimit": 0 },
+  "thresholds": { "minReproducibility": 80, "failOn": ["error", "warning"] },
+  "bundle": { "enabled": true }
+}
+```
+
+**Local Development**:
+```bash
+repro scan https://localhost:3000 --no-headless --max-pages 5
+```
+
+**Production Monitoring** (`repro-prod.json`):
+```json
+{
+  "detectors": {
+    "enabled": ["javascript-errors", "network-errors", "accessibility"]
+  },
+  "crawler": { "maxDepth": 5, "maxPages": 200 },
+  "thresholds": { "failOn": ["error"] }
+}
+```
+
+```bash
+repro scan https://prod.example.com --config repro-prod.json
+```
 ## � MCP Server Integration
 
 Repro-in-a-Box includes an MCP server for Claude Desktop integration.
