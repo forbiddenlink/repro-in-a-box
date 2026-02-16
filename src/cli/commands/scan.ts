@@ -14,6 +14,7 @@ import {
 import { Scanner, type ScanConfig } from '../../scanner/index.js';
 import { createBundle, type BundleOptions } from '../../bundler/index.js';
 import { loadConfig, mergeConfigs, DEFAULT_CONFIG, type ReproConfig, type FullReproConfig } from '../../config/index.js';
+import { generateHtmlReport } from '../../reporters/html-reporter.js';
 
 export const scanCommand = new Command('scan')
   .description('Scan a website for issues')
@@ -21,7 +22,8 @@ export const scanCommand = new Command('scan')
   .option('-d, --max-depth <number>', 'Maximum crawl depth')
   .option('-p, --max-pages <number>', 'Maximum pages to scan')
   .option('-r, --rate-limit <ms>', 'Rate limit between requests')
-  .option('-o, --output <path>', 'Output file path (JSON)')
+  .option('-o, --output <path>', 'Output file path')
+  .option('-f, --format <type>', 'Output format (json, html)', 'json')
   .option('--no-headless', 'Run browser in visible mode')
   .option('--same-domain-only', 'Only crawl pages on the same domain')
   .option('-b, --bundle', 'Create reproducible bundle (ZIP with HAR + screenshots)')
@@ -119,7 +121,7 @@ export const scanCommand = new Command('scan')
     
     // Determine output directory
     const outputDir = options.output 
-      ? (options.output.endsWith('.json') ? join(options.output, '..') : options.output)
+      ? (options.output.match(/\.(json|html)$/) ? join(options.output, '..') : options.output)
       : (config.output.path || process.cwd());
     
     // Ensure output directory exists
@@ -181,13 +183,18 @@ export const scanCommand = new Command('scan')
         }
       }
       
-      // Save scan results to JSON
-      const scanResultsPath = options.output && options.output.endsWith('.json')
-        ? options.output
-        : join(outputDir, `scan-results.json`);
+      // Save scan results
+      const format = options.format || 'json';
+      const extension = format === 'html' ? '.html' : '.json';
+      const outputPath = options.output || join(outputDir, `scan-results${extension}`);
       
-      writeFileSync(scanResultsPath, JSON.stringify(results, null, 2));
-      console.log(`\n💾 Results saved to: ${scanResultsPath}`);
+      if (format === 'html') {
+        generateHtmlReport(results, outputPath);
+        console.log(`\n💾 HTML report saved to: ${outputPath}`);
+      } else {
+        writeFileSync(outputPath, JSON.stringify(results, null, 2));
+        console.log(`\n💾 Results saved to: ${outputPath}`);
+      }
       
       // Create bundle if requested
       if (config.bundle.enabled) {

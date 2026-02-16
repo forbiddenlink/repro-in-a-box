@@ -16,6 +16,7 @@ Autonomous QA agent that finds bugs on your site, captures reproducible evidence
 - **Performance Benchmarked**: <100ms detector attach, <500ms collect, <1s for 100 issues
 - **Multi-Page Crawler**: Configurable depth, rate limiting, same-domain filtering
 - **Auto-Bundling**: Creates reproducible ZIP packages with HAR files and screenshots
+- **HTML Reports**: Professional, modern HTML reports with interactive tables and visual distributions
 - **HAR Replay**: Validates reproducibility by replaying network traffic 3x
 - **Diff Comparison**: Compare scan results across runs
 - **MCP Server**: Claude Desktop integration for AI-powered bug hunting
@@ -131,7 +132,8 @@ Options:
   -d, --max-depth <number>    Maximum crawl depth (default: 2)
   -p, --max-pages <number>    Maximum pages to scan (default: 10)
   -r, --rate-limit <ms>       Rate limit between requests (default: 1000)
-  -o, --output <path>         Output directory for results
+  -o, --output <path>         Output path for results
+  -f, --format <type>         Output format: json, html (default: json)
   --bundle                    Create reproducible ZIP bundle (includes HAR + screenshots)
   --screenshots               Capture screenshots when issues detected  
   --record-har                Record HAR file during scan
@@ -143,6 +145,9 @@ Examples:
 ```bash
 # Quick scan with bundle
 repro scan https://example.com --max-pages 1 --bundle
+
+# Generate professional HTML report
+repro scan https://example.com --format html -o report.html
 
 # Deep scan (multiple pages)
 repro scan https://example.com --max-pages 50 --max-depth 3 --bundle
