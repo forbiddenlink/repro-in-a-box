@@ -9,6 +9,10 @@ import { validateCommand } from './commands/validate.js';
 import { diffCommand } from './commands/diff.js';
 import { initCommand } from './commands/init.js';
 import { VERSION } from './version.js';
+import { registerGlobalErrorHandlers } from '../utils/errors.js';
+
+// Register global error handlers for uncaught exceptions and unhandled rejections
+registerGlobalErrorHandlers();
 
 const program = new Command();
 

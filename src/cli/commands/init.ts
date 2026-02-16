@@ -38,21 +38,21 @@ export const initCommand = new Command('init')
         name: 'maxDepth',
         message: 'Maximum crawl depth (1-10):',
         default: 3,
-        validate: (input: number) => input >= 1 && input <= 10 || 'Must be between 1 and 10',
+        validate: (input: number) => (input >= 1 && input <= 10) ? true : 'Must be between 1 and 10',
       },
       {
         type: 'number',
         name: 'maxPages',
         message: 'Maximum pages to scan (1-1000):',
         default: 100,
-        validate: (input: number) => input >= 1 && input <= 1000 || 'Must be between 1 and 1000',
+        validate: (input: number) => (input >= 1 && input <= 1000) ? true : 'Must be between 1 and 1000',
       },
       {
         type: 'number',
         name: 'rateLimit',
         message: 'Delay between requests in ms (0-5000):',
         default: 100,
-        validate: (input: number) => input >= 0 && input <= 5000 || 'Must be between 0 and 5000',
+        validate: (input: number) => (input >= 0 && input <= 5000) ? true : 'Must be between 0 and 5000',
       },
       {
         type: 'list',
@@ -72,7 +72,7 @@ export const initCommand = new Command('init')
         name: 'minReproducibility',
         message: 'Minimum reproducibility score (0-100):',
         default: 70,
-        validate: (input: number) => input >= 0 && input <= 100 || 'Must be between 0 and 100',
+        validate: (input: number) => (input >= 0 && input <= 100) ? true : 'Must be between 0 and 100',
       },
       {
         type: 'confirm',

@@ -67,20 +67,28 @@ async function loadConfigFromPath(filePath: string): Promise<ReproConfig> {
   // JSON files
   if (filePath.endsWith('.json')) {
     const content = readFileSync(filePath, 'utf-8');
-    const json = JSON.parse(content);
-    
-    // If package.json, extract repro field
-    if (filePath.endsWith('package.json')) {
-      rawConfig = json.repro || {};
-    } else {
-      rawConfig = json;
+    try {
+      const json = JSON.parse(content);
+      
+      // If package.json, extract repro field
+      if (filePath.endsWith('package.json')) {
+        rawConfig = json.repro || {};
+      } else {
+        rawConfig = json;
+      }
+    } catch (error) {
+      throw new Error(`Failed to parse JSON config file: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   // JavaScript files
   else if (filePath.endsWith('.js') || filePath.endsWith('.mjs')) {
-    // Dynamic import for ES modules
-    const module = await import(filePath);
-    rawConfig = module.default || module;
+    try {
+      // Dynamic import for ES modules
+      const module = await import(filePath);
+      rawConfig = module.default || module;
+    } catch (error) {
+      throw new Error(`Failed to import JavaScript config file: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
   else {
     throw new Error(`Unsupported config file format: ${filePath}`);

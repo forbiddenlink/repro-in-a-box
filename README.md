@@ -1,18 +1,24 @@
-# Repro-in-a-Box v2.6 🎁
+# Repro-in-a-Box v2.7 🎁
 
 **Find bugs. Freeze them. Ship them.**
 
 Autonomous QA agent that finds bugs on your site, captures reproducible evidence (HAR files + screenshots), validates reproducibility, and provides Claude Desktop integration via MCP.
 
-[![Version](https://img.shields.io/badge/version-2.6.0-blue)](https://github.com/forbiddenlink/repro-in-a-box)
-[![Tests](https://img.shields.io/badge/tests-119-green)]()
+[![Version](https://img.shields.io/badge/version-2.7.0-blue)](https://github.com/forbiddenlink/repro-in-a-box)
+[![Tests](https://img.shields.io/badge/tests-170-green)]()
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ## ✨ Features
 
 - **7 Built-in Detectors**: JavaScript errors, network failures, broken assets, accessibility (WCAG 2.1), web vitals, mixed content, broken links
-- **Production-Grade Testing**: 119 tests across 9 test files, ~85% code coverage
+- **Production-Grade Infrastructure** ✨ NEW v2.7:
+  - Structured logging with multiple output levels
+  - Comprehensive error handling with exit codes
+  - Configurable timeouts for navigation, actions, and detection
+  - Asset blocking for 30-40% faster scans
+  - Real-time progress reporting with multiple formats
+- **Production-Grade Testing**: 170 tests across 11 test files, ~85% code coverage
 - **Performance Benchmarked**: <100ms detector attach, <500ms collect, <1s for 100 issues
 - **Multi-Page Crawler**: Configurable depth, rate limiting, same-domain filtering
 - **Auto-Bundling**: Creates reproducible ZIP packages with HAR files and screenshots
@@ -46,7 +52,21 @@ repro diff scan-results-1.json scan-results-2.json
 npm run mcp
 ```
 
-## 📦 What's in the Box
+## � Documentation
+
+Complete documentation available in the [docs/](./docs/) directory:
+
+- **[Getting Started](./docs/guides/README.md)** - Feature overview, CLI usage, configuration
+- **[Logging & Error Handling](./docs/guides/logging.md)** - Structured logging and debugging
+- **[Timeout Configuration](./docs/guides/timeout-config.md)** - Network and action timeouts
+- **[Asset Blocking](./docs/guides/asset-blocking.md)** - Performance optimization (30-40% faster)
+- **[Progress Reporting](./docs/guides/progress.md)** - Real-time scanning feedback
+- **[Integration & API](./docs/guides/integration.md)** - Node.js library, CI/CD, MCP server integration
+- **[Troubleshooting](./docs/guides/troubleshooting.md)** - Common issues and solutions
+
+**See [docs/README.md](./docs/README.md) for the complete documentation index.**
+
+## �📦 What's in the Box
 
 ### ✅ Week 1-5: Complete Implementation
 

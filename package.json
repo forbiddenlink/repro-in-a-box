@@ -12,7 +12,9 @@
     "dev": "tsx src/cli/index.ts",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "mcp": "node dist/mcp/index.js"
+    "mcp": "node dist/mcp/index.js",
+    "lint": "eslint src/**/*.ts tests/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix"
   },
   "keywords": [
     "qa",
@@ -53,8 +55,11 @@
   "devDependencies": {
     "@types/inquirer": "^9.0.9",
     "@types/node": "^20.19.33",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "@vitest/coverage-v8": "^1.6.1",
     "@vitest/ui": "^1.6.1",
+    "eslint": "^8.57.0",
     "typescript": "^5.9.3",
     "vitest": "^1.6.1"
   }

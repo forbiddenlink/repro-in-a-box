@@ -11,6 +11,48 @@ import { validateReproducibility } from '../determinism/replayer.js';
 import { diffScans, formatDiff } from '../determinism/diff.js';
 import * as fs from 'fs/promises';
 
+/**
+ * Constants for MCP server configuration
+ */
+const MCP_DEFAULTS = {
+  DEFAULT_MAX_PAGES: 10,
+  DEFAULT_MAX_DEPTH: 2,
+  DEFAULT_REPRODUCIBILITY_RUNS: 3,
+  DEFAULT_REPRODUCIBILITY_THRESHOLD: 70,
+  EXCELLENT_SCORE: 90,
+  GOOD_SCORE: 80,
+  FAIR_SCORE: 70
+};
+
+/**
+ * Type-safe arguments for scan_site tool
+ */
+interface ScanSiteArgs {
+  url: string;
+  maxPages?: number;
+  maxDepth?: number;
+  detectors?: string[];
+  bundle?: boolean;
+  screenshots?: boolean;
+}
+
+/**
+ * Type-safe arguments for validate_reproduction tool
+ */
+interface ValidateReproductionArgs {
+  bundlePath: string;
+  runs?: number;
+  threshold?: number;
+}
+
+/**
+ * Type-safe arguments for diff_scans tool
+ */
+interface DiffScansArgs {
+  baselinePath: string;
+  comparisonPath: string;
+}
+
 export class ReproMcpServer {
   private server: Server;
 
@@ -48,12 +90,12 @@ export class ReproMcpServer {
                 maxPages: { 
                   type: 'number', 
                   description: 'Maximum number of pages to scan',
-                  default: 10 
+                  default: MCP_DEFAULTS.DEFAULT_MAX_PAGES 
                 },
                 maxDepth: {
                   type: 'number',
                   description: 'Maximum crawl depth',
-                  default: 2
+                  default: MCP_DEFAULTS.DEFAULT_MAX_DEPTH
                 },
                 detectors: { 
                   type: 'array', 
@@ -88,12 +130,12 @@ export class ReproMcpServer {
                 runs: {
                   type: 'number',
                   description: 'Number of replay runs to perform',
-                  default: 3
+                  default: MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_RUNS
                 },
                 threshold: {
                   type: 'number',
                   description: 'Minimum reproducibility score (0-100)',
-                  default: 70
+                  default: MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_THRESHOLD
                 }
               },
               required: ['bundlePath']
@@ -127,25 +169,18 @@ export class ReproMcpServer {
 
       switch (name) {
         case 'scan_site':
-          return this.handleScanSite(args as any);
+          return this.handleScanSite(args as unknown as ScanSiteArgs);
         case 'validate_reproduction':
-          return this.handleValidate(args as any);
+          return this.handleValidate(args as unknown as ValidateReproductionArgs);
         case 'diff_scans':
-          return this.handleDiff(args as any);
+          return this.handleDiff(args as unknown as DiffScansArgs);
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
     });
   }
 
-  private async handleScanSite(args: {
-    url: string;
-    maxPages?: number;
-    maxDepth?: number;
-    detectors?: string[];
-    bundle?: boolean;
-    screenshots?: boolean;
-  }) {
+  private async handleScanSite(args: ScanSiteArgs) {
     try {
       // Create detector registry
       const registry = new DetectorRegistry();
@@ -166,8 +201,8 @@ export class ReproMcpServer {
       const config: ScanConfig = {
         url: args.url,
         crawler: {
-          maxDepth: args.maxDepth || 2,
-          maxPages: args.maxPages || 10,
+          maxDepth: args.maxDepth || MCP_DEFAULTS.DEFAULT_MAX_DEPTH,
+          maxPages: args.maxPages || MCP_DEFAULTS.DEFAULT_MAX_PAGES,
           rateLimitMs: 1000,
         },
         headless: true,
@@ -219,18 +254,14 @@ export class ReproMcpServer {
     }
   }
 
-  private async handleValidate(args: {
-    bundlePath: string;
-    runs?: number;
-    threshold?: number;
-  }) {
+  private async handleValidate(args: ValidateReproductionArgs) {
     try {
       const result = await validateReproducibility({
         bundlePath: args.bundlePath,
-        runs: args.runs || 3,
+        runs: args.runs || MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_RUNS,
       });
       
-      const threshold = args.threshold || 70;
+      const threshold = args.threshold || MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_THRESHOLD;
       const passed = result.reproducibilityScore >= threshold;
       
       const summary = `Validation Results:\n\n` +
@@ -240,9 +271,9 @@ export class ReproMcpServer {
         `Original Scan: ${result.originalScan.summary.totalIssues} issues\n` +
         `Replay Runs: ${result.summary.totalRuns} (${result.summary.successfulRuns} successful)\n` +
         `Average Issues Found: ${result.summary.averageIssuesFound.toFixed(1)}\n\n` +
-        `Grade: ${result.reproducibilityScore >= 90 ? '🥇 Excellent' : 
-                  result.reproducibilityScore >= 80 ? '🥈 Good' : 
-                  result.reproducibilityScore >= 70 ? '🥉 Fair' : '❌ Poor'}`;
+        `Grade: ${result.reproducibilityScore >= MCP_DEFAULTS.EXCELLENT_SCORE ? '🥇 Excellent' : 
+                  result.reproducibilityScore >= MCP_DEFAULTS.GOOD_SCORE ? '🥈 Good' : 
+                  result.reproducibilityScore >= MCP_DEFAULTS.FAIR_SCORE ? '🥉 Fair' : '❌ Poor'}`;
       
       return {
         content: [
@@ -266,10 +297,7 @@ export class ReproMcpServer {
     }
   }
 
-  private async handleDiff(args: {
-    baselinePath: string;
-    comparisonPath: string;
-  }) {
+  private async handleDiff(args: DiffScansArgs) {
     try {
       // Load scan results
       const baseline = JSON.parse(await fs.readFile(args.baselinePath, 'utf-8'));

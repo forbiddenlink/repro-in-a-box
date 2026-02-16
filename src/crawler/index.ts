@@ -16,6 +16,8 @@ export interface CrawlerConfig {
   includePatterns?: string[];
   /** URL patterns to exclude (regex strings) */
   excludePatterns?: string[];
+  /** Navigation timeout in milliseconds (default: 30000) */
+  navigationTimeoutMs?: number;
 }
 
 /**
@@ -42,6 +44,7 @@ export class Crawler {
       maxDepth: config.maxDepth ?? 2,
       rateLimitMs: config.rateLimitMs ?? 1000,
       sameDomain: config.sameDomain ?? true,
+      navigationTimeoutMs: config.navigationTimeoutMs ?? 30000,
       includePatterns: config.includePatterns ?? [],
       excludePatterns: config.excludePatterns ?? [
         '\\.(pdf|zip|gz|tar|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot)$',
@@ -153,10 +156,10 @@ export class Crawler {
     const normalized = this.normalizeUrl(url);
     this.visited.add(normalized);
     
-    // Navigate to the page
+    // Navigate to the page with configured timeout
     const response = await page.goto(normalized, { 
       waitUntil: 'networkidle',
-      timeout: 30000 
+      timeout: this.config.navigationTimeoutMs
     });
     
     const statusCode = response?.status() ?? 0;
