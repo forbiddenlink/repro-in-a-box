@@ -23,72 +23,67 @@ export class WebVitalsDetector extends BaseDetector {
   
   private metrics: WebVitalsMetric[] = [];
   
-  async attach(page: Page, _config?: DetectorConfig): Promise<void> {
-    // Inject web-vitals library and setup metric collection
-    await page.addInitScript(() => {
-      // Store metrics in window object
-      (globalThis as any).__webVitalsMetrics = [];
-      
-      // This will be replaced with actual web-vitals library code
-      // For now, we'll collect it in the scan phase
-    });
+  async attach(_page: Page, _config?: DetectorConfig): Promise<void> {
+    // No setup needed - web-vitals will be injected on each scan
   }
-  
+
   async scan(page: Page, _config?: DetectorConfig): Promise<Issue[]> {
     try {
       // Inject and run web-vitals library using a script tag approach
       // This avoids Vite's dynamic import issues in test environments
+      // Note: page.evaluate runs in browser context where document/window exist
       const metrics = await page.evaluate(() => {
-        return new Promise<any[]>((resolve) => {
-          const collectedMetrics: any[] = [];
-          
-          // @ts-expect-error - document and window are available in browser context
-          const script = document.createElement('script');
+        return new Promise<WebVitalsMetric[]>((resolve) => {
+          const collectedMetrics: WebVitalsMetric[] = [];
+
+          // @ts-expect-error - document exists in browser context
+          const script = document.createElement('script') as HTMLScriptElement;
           script.type = 'module';
           script.textContent = `
             import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
-            
+
             const metrics = [];
-            
+
             onCLS((metric) => {
               metrics.push({ name: 'CLS', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
               window.__webVitalsReady = metrics;
             });
-            
+
             onINP((metric) => {
               metrics.push({ name: 'INP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
               window.__webVitalsReady = metrics;
             });
-            
+
             onLCP((metric) => {
               metrics.push({ name: 'LCP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
               window.__webVitalsReady = metrics;
             });
-            
+
             onFCP((metric) => {
               metrics.push({ name: 'FCP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
               window.__webVitalsReady = metrics;
             });
-            
+
             onTTFB((metric) => {
               metrics.push({ name: 'TTFB', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
               window.__webVitalsReady = metrics;
             });
           `;
-          
-          // @ts-expect-error - document is available in browser context
+
+          // @ts-expect-error - document exists in browser context
           document.head.appendChild(script);
-          
+
           // Wait for metrics to be collected
           const checkInterval = setInterval(() => {
-            // @ts-expect-error - window is available in browser context
-            if (window.__webVitalsReady) {
+            // @ts-expect-error - window exists in browser context
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const ready = window.__webVitalsReady;
+            if (ready) {
               clearInterval(checkInterval);
-              // @ts-expect-error - window is available in browser context
-              resolve(window.__webVitalsReady);
+              resolve(ready as WebVitalsMetric[]);
             }
           }, 100);
-          
+
           // Timeout after 2 seconds
           setTimeout(() => {
             clearInterval(checkInterval);
@@ -96,7 +91,7 @@ export class WebVitalsDetector extends BaseDetector {
           }, 2000);
         });
       });
-      
+
       this.metrics = metrics as WebVitalsMetric[];
       
       // Convert poor-rated metrics to issues

@@ -20,7 +20,9 @@ export enum IssueCategory {
   ACCESSIBILITY = 'accessibility',
   PERFORMANCE = 'performance',
   SECURITY = 'security',
-  LINKS = 'links'
+  LINKS = 'links',
+  CONSOLE = 'console',
+  SEO = 'seo'
 }
 
 /**
@@ -167,9 +169,10 @@ export abstract class BaseDetector implements Detector {
   /**
    * Default implementation of setup hook
    */
-  async setup(_config?: DetectorConfig): Promise<void> {
+  setup(_config?: DetectorConfig): Promise<void> {
     this.issues = [];
     this.startTime = Date.now();
+    return Promise.resolve();
   }
   
   /**
@@ -181,7 +184,7 @@ export abstract class BaseDetector implements Detector {
    * Default implementation of collect hook
    * Collects accumulated issues and clears them for the next page
    */
-  async collect(page: Page): Promise<DetectorResult> {
+  collect(page: Page): Promise<DetectorResult> {
     const endTime = Date.now();
     const result: DetectorResult = {
       detector: this.id,
@@ -191,19 +194,20 @@ export abstract class BaseDetector implements Detector {
       duration: endTime - this.startTime,
       issues: [...this.issues] // Copy the issues array
     };
-    
+
     // Clear issues for next page
     this.issues = [];
     // Reset start time for next page
     this.startTime = Date.now();
-    
-    return result;
+
+    return Promise.resolve(result);
   }
-  
+
   /**
    * Default implementation of cleanup hook
    */
-  async cleanup(): Promise<void> {
+  cleanup(): Promise<void> {
     this.issues = [];
+    return Promise.resolve();
   }
 }

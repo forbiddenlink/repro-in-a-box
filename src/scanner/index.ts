@@ -283,7 +283,7 @@ export class Scanner {
       await page.screenshot({ path: screenshotPath, fullPage: true });
       return screenshotPath;
     } catch (error) {
-      console.warn(`⚠️  Failed to capture screenshot: ${error}`);
+      console.warn(`⚠️  Failed to capture screenshot: ${error instanceof Error ? error.message : String(error)}`);
       return undefined;
     }
   }

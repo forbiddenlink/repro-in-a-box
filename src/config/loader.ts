@@ -68,11 +68,11 @@ async function loadConfigFromPath(filePath: string): Promise<ReproConfig> {
   if (filePath.endsWith('.json')) {
     const content = readFileSync(filePath, 'utf-8');
     try {
-      const json = JSON.parse(content);
-      
+      const json: unknown = JSON.parse(content);
+
       // If package.json, extract repro field
       if (filePath.endsWith('package.json')) {
-        rawConfig = json.repro || {};
+        rawConfig = (json as { repro?: unknown }).repro ?? {};
       } else {
         rawConfig = json;
       }
@@ -84,8 +84,8 @@ async function loadConfigFromPath(filePath: string): Promise<ReproConfig> {
   else if (filePath.endsWith('.js') || filePath.endsWith('.mjs')) {
     try {
       // Dynamic import for ES modules
-      const module = await import(filePath);
-      rawConfig = module.default || module;
+      const module: { default?: unknown } = await import(filePath) as { default?: unknown };
+      rawConfig = module.default ?? module;
     } catch (error) {
       throw new Error(`Failed to import JavaScript config file: ${error instanceof Error ? error.message : String(error)}`);
     }

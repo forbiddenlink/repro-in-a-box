@@ -10,7 +10,7 @@ export class NetworkErrorsDetector extends BaseDetector {
   readonly description = 'Detects failed HTTP requests, timeouts, and network errors';
   readonly category = IssueCategory.NETWORK;
   
-  async attach(page: Page, _config?: DetectorConfig): Promise<void> {
+  attach(page: Page, _config?: DetectorConfig): Promise<void> {
     // Listen for failed requests
     page.on('requestfailed', (request) => {
       const failure = request.failure();
@@ -79,5 +79,7 @@ export class NetworkErrorsDetector extends BaseDetector {
         );
       }
     });
+
+    return Promise.resolve();
   }
 }

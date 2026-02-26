@@ -10,7 +10,7 @@ export class MixedContentDetector extends BaseDetector {
   readonly description = 'Detects insecure HTTP resources loaded on HTTPS pages';
   readonly category = IssueCategory.SECURITY;
   
-  async attach(page: Page, _config?: DetectorConfig): Promise<void> {
+  attach(page: Page, _config?: DetectorConfig): Promise<void> {
     // Listen for all requests
     page.on('request', (request) => {
       const pageUrl = page.url();
@@ -53,9 +53,11 @@ export class MixedContentDetector extends BaseDetector {
             )
           );
         }
-      } catch (error) {
+      } catch {
         // Invalid URL, skip
       }
     });
+
+    return Promise.resolve();
   }
 }

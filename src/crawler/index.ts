@@ -136,12 +136,12 @@ export class Crawler {
    * Extract links from a page
    */
   private async extractLinks(page: Page): Promise<string[]> {
-    return await page.evaluate(() => {
-      const links = Array.from((globalThis as any).document.querySelectorAll('a[href]'));
-      return links
-        .map((link: any) => link.href)
-        .filter((href: string) => href && href.trim() !== '');
-    });
+    // Use page.$$eval which handles browser context typing properly
+    return await page.$$eval('a[href]', (anchors) =>
+      anchors
+        .map((a) => (a as { href?: string }).href ?? '')
+        .filter((href) => href && href.trim() !== '')
+    );
   }
   
   /**

@@ -12,7 +12,7 @@ export class BrokenLinksDetector extends BaseDetector {
   
   private checkedLinks = new Set<string>();
   
-  async attach(page: Page, _config?: DetectorConfig): Promise<void> {
+  attach(page: Page, _config?: DetectorConfig): Promise<void> {
     // Listen for navigation responses to catch link clicks
     page.on('response', (response) => {
       const url = response.url();
@@ -38,19 +38,20 @@ export class BrokenLinksDetector extends BaseDetector {
         );
       }
     });
+
+    return Promise.resolve();
   }
-  
+
   async scan(page: Page, _config?: DetectorConfig): Promise<Issue[]> {
     try {
-      // Extract all links from the page
-      const links = await page.evaluate(() => {
-        const anchors = Array.from((globalThis as any).document.querySelectorAll('a[href]'));
-        return anchors.map((a: any) => ({
-          href: a.href,
-          text: a.textContent?.trim() || '',
-          rel: a.rel
-        }));
-      });
+      // Extract all links from the page using $$eval for proper typing
+      const links = await page.$$eval('a[href]', (anchors) =>
+        anchors.map((a) => ({
+          href: (a as { href?: string }).href ?? '',
+          text: a.textContent?.trim() ?? '',
+          rel: a.getAttribute('rel') ?? ''
+        }))
+      );
       
       // Check each link (limited to avoid long scan times)
       const linksToCheck = links.slice(0, 50); // Limit to first 50 links

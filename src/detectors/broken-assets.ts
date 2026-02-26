@@ -12,21 +12,21 @@ export class BrokenAssetsDetector extends BaseDetector {
   
   private readonly assetTypes = ['image', 'stylesheet', 'script', 'font'];
   
-  async attach(page: Page, _config?: DetectorConfig): Promise<void> {
+  attach(page: Page, _config?: DetectorConfig): Promise<void> {
     // Listen for responses to catch broken assets
     page.on('response', (response) => {
       const request = response.request();
       const resourceType = request.resourceType();
       const status = response.status();
-      
+
       // Only check asset types and error status codes
       if (!this.assetTypes.includes(resourceType) || status < 400) {
         return;
       }
-      
+
       // Determine severity based on resource type and status
       let severity: IssueSeverity;
-      
+
       if (resourceType === 'script') {
         // Broken scripts can break functionality
         severity = IssueSeverity.ERROR;
@@ -40,7 +40,7 @@ export class BrokenAssetsDetector extends BaseDetector {
         // Broken images are usually not critical
         severity = IssueSeverity.WARNING;
       }
-      
+
       this.addIssue(
         this.createIssue(
           `broken-${resourceType}`,
@@ -60,19 +60,19 @@ export class BrokenAssetsDetector extends BaseDetector {
         )
       );
     });
-    
+
     // Also listen for request failures for assets
     page.on('requestfailed', (request) => {
       const resourceType = request.resourceType();
-      
+
       // Only report asset failures
       if (!this.assetTypes.includes(resourceType)) {
         return;
       }
-      
+
       const failure = request.failure();
       const errorText = failure?.errorText || 'Unknown error';
-      
+
       // Assets that fail to load are warnings
       this.addIssue(
         this.createIssue(
@@ -91,5 +91,7 @@ export class BrokenAssetsDetector extends BaseDetector {
         )
       );
     });
+
+    return Promise.resolve();
   }
 }
