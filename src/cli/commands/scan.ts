@@ -10,6 +10,8 @@ import {
   WebVitalsDetector,
   MixedContentDetector,
   BrokenLinksDetector,
+  ConsoleWarningsDetector,
+  SeoDetector,
 } from '../../detectors/index.js';
 import { Scanner, type ScanConfig } from '../../scanner/index.js';
 import { createBundle, type BundleOptions } from '../../bundler/index.js';
@@ -103,6 +105,8 @@ export const scanCommand = new Command('scan')
         'web-vitals': new WebVitalsDetector(),
         'mixed-content': new MixedContentDetector(),
         'broken-links': new BrokenLinksDetector(),
+        'console-warnings': new ConsoleWarningsDetector(),
+        'seo': new SeoDetector(),
       };
       
       // Determine which detectors to enable

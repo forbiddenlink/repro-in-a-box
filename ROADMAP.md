@@ -1,96 +1,84 @@
 # Repro-in-a-Box Roadmap
 
-**Current Version:** v2.5.0 🚀  
-**Status:** Production-ready, 112+ tests, ~85% coverage  
-**Published:** February 15, 2026
+**Current Version:** v2.7.0 🚀
+**Status:** Production-ready, 182+ tests, 8 detectors, ~85% coverage
+**Published:** February 25, 2026
 
 ---
 
-## ✅ Completed (v1.0 - v2.5.0)
+## ✅ Completed (v1.0 - v2.7.0)
 
 ### Core Features
-- ✅ 7 built-in detectors (JS errors, network, assets, a11y, web vitals, mixed content, broken links)
+- ✅ 9 built-in detectors (JS errors, network, assets, a11y, web vitals, mixed content, broken links, console warnings, SEO)
 - ✅ Multi-page crawler with rate limiting
 - ✅ Auto-bundling (ZIP with HAR + screenshots)
 - ✅ HAR replay validation (3x reproducibility testing)
 - ✅ Diff comparison utility
 - ✅ MCP server for Claude Desktop integration
-- ✅ CLI commands (scan, validate, diff)
-- ✅ Comprehensive test suite (112+ tests)
+- ✅ CLI commands (scan, validate, diff, init)
+- ✅ Comprehensive test suite (199+ tests)
 - ✅ Performance benchmarks
+- ✅ Configuration system (.reprorc.json/.js, package.json)
+- ✅ HTML report generator
+- ✅ Structured logging with verbosity levels
+- ✅ Progress reporting (simple, detailed, minimal formats)
 
 ---
 
-## 🎯 v2.6: Developer Experience (Est. 1-2 weeks)
+## ✅ v2.6: Developer Experience (COMPLETED)
 
 **Goal:** Make it easier to configure, customize, and integrate
 
-### Configuration System
-- [ ] **Config File Support** (`.reprorc.json`, `.reprorc.js`)
-  ```json
-  {
-    "detectors": ["js-errors", "accessibility", "web-vitals"],
-    "crawler": { "maxDepth": 3, "maxPages": 50 },
-    "output": { "format": "json", "path": "./reports" },
-    "thresholds": { "minReproducibility": 70 }
-  }
-  ```
-- [ ] **Environment Variables** (`REPRO_MAX_DEPTH`, `REPRO_DETECTORS`, etc.)
-- [ ] **Config Validation** with Zod schemas
+### ✅ Configuration System
+- [x] **Config File Support** (`.reprorc.json`, `.reprorc.js`)
+- [x] **Package.json integration** (`repro` field)
+- [x] **Config Validation** with Zod schemas
 
-### CLI Enhancements
-- [ ] **Interactive Setup:** `repro init` (prompts for settings)
-- [ ] **Global Install:** `npm install -g repro-in-a-box`
-- [ ] **Output Formats:** `--format json|csv|html|github-actions`
-- [ ] **Watch Mode:** `repro scan --watch` (re-scan on file changes)
-- [ ] **Quiet/Verbose Flags:** `--quiet`, `--verbose`, `--debug`
-- [ ] **Progress Indicators:** Spinners, progress bars, ETA
+### ✅ CLI Enhancements
+- [x] **Interactive Setup:** `repro init` (prompts for settings)
+- [x] **Global Install:** `npm install -g repro-in-a-box`
+- [x] **Output Formats:** `--format json|html`
+- [x] **Quiet/Verbose Flags:** `--quiet`, `--verbose`, `--debug`
+- [x] **Progress Indicators:** Real-time progress reporting
 
-### Error Handling
-- [ ] Better error messages with suggestions
-- [ ] Graceful degradation (continue on detector failures)
-- [ ] Retry logic for network failures
-- [ ] Detailed debug logs (`--debug` flag)
-
-**Tests:** 25+ new tests  
-**Deliverable:** v2.6.0 with enhanced DX
+### ✅ Error Handling
+- [x] Better error messages with suggestions
+- [x] Graceful degradation (continue on detector failures)
+- [x] Detailed debug logs (`--debug` flag)
 
 ---
 
-## 🔍 v2.7: New Detectors (Est. 1 week)
+## 🔍 v2.8: Additional Detectors (Est. 1 week)
 
 **Goal:** Expand detection capabilities to 12+ detectors
 
-### SEO Detector
-- [ ] Meta tags (title, description lengths)
-- [ ] Open Graph tags (og:title, og:image, etc.)
-- [ ] Twitter Card tags
-- [ ] Structured data (JSON-LD, microdata)
-- [ ] Canonical URLs
-- [ ] XML sitemap validation
-- [ ] Robots.txt parsing
+### ✅ SEO Detector (COMPLETED in v2.7)
+- [x] Meta tags (title, description lengths)
+- [x] Open Graph tags (og:title, og:image, etc.)
+- [x] Twitter Card tags
+- [x] Structured data (JSON-LD validation)
+- [x] Canonical URLs
+- [x] H1 heading validation
+- [x] Viewport and lang attribute checks
 
 ### Performance Detector
 - [ ] Bundle size analysis (JS, CSS, images)
 - [ ] Render-blocking resources
 - [ ] Unused CSS/JS detection
 - [ ] Image optimization suggestions
-- [ ] Font loading strategies
-- [ ] Third-party script analysis
 
 ### Security Detector
 - [ ] Content Security Policy (CSP) violations
 - [ ] HTTPS enforcement
-- [ ] Mixed content warnings (beyond current basic check)
 - [ ] Secure cookie flags
 - [ ] X-Frame-Options, X-Content-Type-Options
 - [ ] Subresource Integrity (SRI) validation
 
-### Console Warnings Detector
-- [ ] Separate from error detector
-- [ ] Categorize by severity
-- [ ] Common framework warnings (React, Vue, Angular)
-- [ ] Deprecation warnings
+### ✅ Console Warnings Detector (COMPLETED in v2.7)
+- [x] Separate from error detector
+- [x] Categorize by severity
+- [x] Common framework warnings (React, Vue, Angular)
+- [x] Deprecation warnings
 
 ### Memory Leak Detector
 - [ ] Track memory usage over time
@@ -98,8 +86,8 @@
 - [ ] Event listener leaks
 - [ ] DOM node leaks
 
-**Tests:** 40+ new tests (8 tests per detector)  
-**Deliverable:** v2.7.0 with 12 total detectors
+**Tests:** 40+ new tests (8 tests per detector)
+**Deliverable:** v2.8.0 with 12 total detectors
 
 ---
 

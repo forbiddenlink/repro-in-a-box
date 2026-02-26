@@ -2,7 +2,7 @@ import { chromium, type Browser, type BrowserContext, type Page } from '@playwri
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Scanner, type ScanResults, type ScanConfig } from '../scanner/index.js';
-import { 
+import {
   DetectorRegistry,
   JavaScriptErrorsDetector,
   NetworkErrorsDetector,
@@ -11,6 +11,8 @@ import {
   WebVitalsDetector,
   MixedContentDetector,
   BrokenLinksDetector,
+  ConsoleWarningsDetector,
+  SeoDetector,
 } from '../detectors/index.js';
 
 export interface ReplayOptions {
@@ -236,6 +238,8 @@ export async function validateReproducibility(options: ValidationOptions): Promi
   registry.register(new WebVitalsDetector());
   registry.register(new MixedContentDetector());
   registry.register(new BrokenLinksDetector());
+  registry.register(new ConsoleWarningsDetector());
+  registry.register(new SeoDetector());
   
   const scanner = new Scanner(registry);
   

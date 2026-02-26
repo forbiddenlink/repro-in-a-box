@@ -12,3 +12,5 @@ export { AccessibilityDetector } from './accessibility.js';
 export { WebVitalsDetector } from './web-vitals.js';
 export { MixedContentDetector } from './mixed-content.js';
 export { BrokenLinksDetector } from './broken-links.js';
+export { ConsoleWarningsDetector } from './console-warnings.js';
+export { SeoDetector } from './seo.js';
