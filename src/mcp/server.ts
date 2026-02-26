@@ -6,7 +6,7 @@ import {
   Tool
 } from '@modelcontextprotocol/sdk/types.js';
 import { Scanner, type ScanConfig } from '../scanner/index.js';
-import { DetectorRegistry, JavaScriptErrorsDetector, NetworkErrorsDetector, BrokenAssetsDetector, AccessibilityDetector, WebVitalsDetector, MixedContentDetector, BrokenLinksDetector, ConsoleWarningsDetector, SeoDetector } from '../detectors/index.js';
+import { DetectorRegistry, JavaScriptErrorsDetector, NetworkErrorsDetector, BrokenAssetsDetector, AccessibilityDetector, WebVitalsDetector, MixedContentDetector, BrokenLinksDetector, ConsoleWarningsDetector, SeoDetector, PerformanceDetector } from '../detectors/index.js';
 import { validateReproducibility } from '../determinism/replayer.js';
 import { diffScans, formatDiff } from '../determinism/diff.js';
 import * as fs from 'fs/promises';
@@ -195,7 +195,8 @@ export class ReproMcpServer {
       registry.register(new BrokenLinksDetector());
       registry.register(new ConsoleWarningsDetector());
       registry.register(new SeoDetector());
-      
+      registry.register(new PerformanceDetector());
+
       // Create scanner
       const scanner = new Scanner(registry);
       

@@ -1,7 +1,7 @@
 # Repro-in-a-Box Roadmap
 
-**Current Version:** v2.7.0 🚀
-**Status:** Production-ready, 182+ tests, 8 detectors, ~85% coverage
+**Current Version:** v2.8.0 🚀
+**Status:** Production-ready, 215+ tests, 10 detectors, ~85% coverage
 **Published:** February 25, 2026
 
 ---
@@ -9,7 +9,7 @@
 ## ✅ Completed (v1.0 - v2.7.0)
 
 ### Core Features
-- ✅ 9 built-in detectors (JS errors, network, assets, a11y, web vitals, mixed content, broken links, console warnings, SEO)
+- ✅ 10 built-in detectors (JS errors, network, assets, a11y, web vitals, mixed content, broken links, console warnings, SEO, performance)
 - ✅ Multi-page crawler with rate limiting
 - ✅ Auto-bundling (ZIP with HAR + screenshots)
 - ✅ HAR replay validation (3x reproducibility testing)
@@ -61,11 +61,11 @@
 - [x] H1 heading validation
 - [x] Viewport and lang attribute checks
 
-### Performance Detector
-- [ ] Bundle size analysis (JS, CSS, images)
-- [ ] Render-blocking resources
-- [ ] Unused CSS/JS detection
-- [ ] Image optimization suggestions
+### ✅ Performance Detector (COMPLETED in v2.8)
+- [x] Bundle size analysis (JS, CSS, images)
+- [x] Render-blocking resources
+- [ ] Unused CSS/JS detection (future)
+- [x] Image optimization suggestions
 
 ### Security Detector
 - [ ] Content Security Policy (CSP) violations

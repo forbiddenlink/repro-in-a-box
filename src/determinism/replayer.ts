@@ -13,6 +13,7 @@ import {
   BrokenLinksDetector,
   ConsoleWarningsDetector,
   SeoDetector,
+  PerformanceDetector,
 } from '../detectors/index.js';
 
 export interface ReplayOptions {
@@ -240,7 +241,8 @@ export async function validateReproducibility(options: ValidationOptions): Promi
   registry.register(new BrokenLinksDetector());
   registry.register(new ConsoleWarningsDetector());
   registry.register(new SeoDetector());
-  
+  registry.register(new PerformanceDetector());
+
   const scanner = new Scanner(registry);
   
   // Run multiple replays

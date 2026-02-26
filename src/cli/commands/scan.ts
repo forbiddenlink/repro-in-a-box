@@ -12,6 +12,7 @@ import {
   BrokenLinksDetector,
   ConsoleWarningsDetector,
   SeoDetector,
+  PerformanceDetector,
 } from '../../detectors/index.js';
 import { Scanner, type ScanConfig } from '../../scanner/index.js';
 import { createBundle, type BundleOptions } from '../../bundler/index.js';
@@ -107,6 +108,7 @@ export const scanCommand = new Command('scan')
         'broken-links': new BrokenLinksDetector(),
         'console-warnings': new ConsoleWarningsDetector(),
         'seo': new SeoDetector(),
+        'performance': new PerformanceDetector(),
       };
       
       // Determine which detectors to enable
