@@ -1,15 +1,15 @@
 # Repro-in-a-Box Roadmap
 
-**Current Version:** v2.8.0 🚀
-**Status:** Production-ready, 215+ tests, 10 detectors, ~85% coverage
-**Published:** February 25, 2026
+**Current Version:** v2.9.0 🚀
+**Status:** Production-ready, 247 tests, 12 detectors, ~85% coverage
+**Published:** March 7, 2026
 
 ---
 
 ## ✅ Completed (v1.0 - v2.7.0)
 
 ### Core Features
-- ✅ 10 built-in detectors (JS errors, network, assets, a11y, web vitals, mixed content, broken links, console warnings, SEO, performance)
+- ✅ 12 built-in detectors (JS errors, network, assets, a11y, web vitals, mixed content, broken links, console warnings, SEO, performance, security, memory leak)
 - ✅ Multi-page crawler with rate limiting
 - ✅ Auto-bundling (ZIP with HAR + screenshots)
 - ✅ HAR replay validation (3x reproducibility testing)
@@ -67,12 +67,12 @@
 - [ ] Unused CSS/JS detection (future)
 - [x] Image optimization suggestions
 
-### Security Detector
-- [ ] Content Security Policy (CSP) violations
-- [ ] HTTPS enforcement
-- [ ] Secure cookie flags
-- [ ] X-Frame-Options, X-Content-Type-Options
-- [ ] Subresource Integrity (SRI) validation
+### ✅ Security Detector (COMPLETED in v2.9)
+- [x] Content Security Policy (CSP) violations
+- [x] HTTPS enforcement
+- [x] Secure cookie flags
+- [x] X-Frame-Options, X-Content-Type-Options
+- [x] Subresource Integrity (SRI) validation
 
 ### ✅ Console Warnings Detector (COMPLETED in v2.7)
 - [x] Separate from error detector
@@ -80,11 +80,11 @@
 - [x] Common framework warnings (React, Vue, Angular)
 - [x] Deprecation warnings
 
-### Memory Leak Detector
-- [ ] Track memory usage over time
-- [ ] Detect growing memory patterns
-- [ ] Event listener leaks
-- [ ] DOM node leaks
+### ✅ Memory Leak Detector (COMPLETED in v2.9)
+- [x] Track memory usage over time
+- [x] Detect growing memory patterns
+- [x] Event listener leaks
+- [x] DOM node leaks
 
 **Tests:** 40+ new tests (8 tests per detector)
 **Deliverable:** v2.8.0 with 12 total detectors
