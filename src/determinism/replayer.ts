@@ -1,7 +1,7 @@
 import { chromium, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Scanner, type ScanResults, type ScanConfig } from '../scanner/index.js';
+import { Scanner, type ScanResults } from '../scanner/index.js';
 import {
   DetectorRegistry,
   JavaScriptErrorsDetector,
@@ -14,6 +14,8 @@ import {
   ConsoleWarningsDetector,
   SeoDetector,
   PerformanceDetector,
+  SecurityDetector,
+  MemoryLeakDetector,
 } from '../detectors/index.js';
 
 export interface ReplayOptions {
@@ -106,7 +108,7 @@ export async function replayFromHar(options: ReplayOptions): Promise<ReplayResul
     
     // Run scan using the scanner's detector logic
     // We need to manually run detectors since we've already navigated
-    const registry = (options.scanner as any).registry as DetectorRegistry;
+    const registry = (options.scanner as unknown as { registry: DetectorRegistry }).registry;
     const detectors = registry.getEnabled();
     
     // Attach detectors
@@ -217,7 +219,7 @@ export async function validateReproducibility(options: ValidationOptions): Promi
   
   // Load original scan results
   const originalScanPath = path.join(bundleDir, 'scan-results.json');
-  const originalScan: ScanResults = JSON.parse(await fs.readFile(originalScanPath, 'utf-8'));
+  const originalScan = JSON.parse(await fs.readFile(originalScanPath, 'utf-8')) as ScanResults;
   
   // Find HAR file
   const harPath = path.join(bundleDir, 'recording.har');
@@ -242,6 +244,8 @@ export async function validateReproducibility(options: ValidationOptions): Promi
   registry.register(new ConsoleWarningsDetector());
   registry.register(new SeoDetector());
   registry.register(new PerformanceDetector());
+  registry.register(new SecurityDetector());
+  registry.register(new MemoryLeakDetector());
 
   const scanner = new Scanner(registry);
   

@@ -5,6 +5,70 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Security Detector** - New detector for security issues:
+  - HTTPS enforcement validation
+  - Security headers: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+  - Cookie security flags: Secure, HttpOnly, SameSite
+  - Subresource Integrity (SRI) validation for external scripts/stylesheets
+- 19 new tests for Security detector
+- **Memory Leak Detector** - Detects memory issues:
+  - Memory growth patterns over time
+  - High baseline memory usage (>200MB)
+  - Excessive event listeners
+  - Detached DOM node leaks
+- 13 new tests for Memory Leak detector
+- Total detectors increased to **12**
+- Total tests increased to **247**
+
+### Changed
+- Fixed 23% of ESLint warnings (73 → 56 warnings) through proper typing
+- Improved type safety across multiple detector files
+
+---
+
+## [2.8.0] - 2026-02-25
+
+### Added
+- **Performance Detector** - Detects performance issues:
+  - Render-blocking scripts (missing `async`/`defer`)
+  - Render-blocking stylesheets
+  - Large JavaScript files (>250KB)
+  - Large CSS files (>100KB)
+  - Large images (>500KB)
+  - Image optimization suggestions (WebP/AVIF recommendations)
+
+### Changed
+- Total detectors increased to 10
+- Test suite expanded to 215+ tests
+
+---
+
+## [2.7.0] - 2026-02
+
+### Added
+- **Console Warnings Detector** - Detects console warnings separate from errors:
+  - Framework-specific warnings (React, Vue, Angular)
+  - Deprecation warnings
+  - Severity categorization
+- **SEO Detector** - Comprehensive SEO analysis:
+  - Meta tags (title, description with length validation)
+  - Open Graph tags (og:title, og:image, og:description, og:type)
+  - Twitter Card tags
+  - Structured data (JSON-LD validation)
+  - Canonical URLs
+  - H1 heading validation (missing/multiple)
+  - Viewport and lang attribute checks
+
+### Fixed
+- Web Vitals dynamic import error resolved
+- TypeScript type safety improvements
+- ESLint configuration enhancements
+
+---
+
 ## [2.6.0] - 2026-02-16
 
 ### 🎉 Major Release: Configuration System
@@ -200,26 +264,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Upcoming
 
-See [ROADMAP.md](ROADMAP.md) for planned features in v2.6-v3.0.
+See [ROADMAP.md](ROADMAP.md) for planned features in v2.9-v3.0.
 
-### v2.6: Developer Experience (Planned)
-- Configuration file support (`.reprorc.json`)
-- Interactive setup wizard (`repro init`)
-- Multiple output formats (JSON, CSV, HTML, GitHub Actions)
-- Enhanced error handling and logging
+### v2.9: Plugin System (Planned)
+- Custom detector interface
+- Plugin discovery from `node_modules/repro-plugin-*`
+- Plugin registry for NPM packages
+- Plugin lifecycle hooks
 
-### v2.7: New Detectors (Planned)
-- SEO detector
-- Performance detector
-- Security detector
-- Console warnings detector
-- Memory leak detector
-
-### v2.8: Reporting & Visualization (Planned)
-- HTML report generator
-- Web dashboard
-- GitHub Actions integration
-- Visual charts and graphs
+### v3.0: Enterprise Features (Planned)
+- Scheduled scanning with cron support
+- Historical tracking in SQLite database
+- Webhooks and notifications (Slack, Discord, email)
+- REST/GraphQL API server
+- CI/CD integrations (GitHub Actions, GitLab CI)
 
 ---
 

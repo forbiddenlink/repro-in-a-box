@@ -15,3 +15,5 @@ export { BrokenLinksDetector } from './broken-links.js';
 export { ConsoleWarningsDetector } from './console-warnings.js';
 export { SeoDetector } from './seo.js';
 export { PerformanceDetector } from './performance.js';
+export { SecurityDetector } from './security.js';
+export { MemoryLeakDetector } from './memory-leak.js';
