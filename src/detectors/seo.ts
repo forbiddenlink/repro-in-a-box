@@ -91,16 +91,16 @@ export class SeoDetector extends BaseDetector {
       return el ? await el.getAttribute('content') : null;
     };
 
-    const h1Text = await page.$$eval('h1', (elements) =>
-      elements.map(el => el.textContent?.trim() ?? '').filter(t => t)
+    const h1Text = await page.$$eval('h1', (elements: Element[]) =>
+      elements.map(el => el.textContent?.trim() ?? '').filter((t): t is string => !!t)
     );
 
-    const jsonLd = await page.$$eval('script[type="application/ld+json"]', (scripts) =>
-      scripts.map(s => s.textContent?.trim() ?? '').filter(t => t)
+    const jsonLd = await page.$$eval('script[type="application/ld+json"]', (scripts: Element[]) =>
+      scripts.map(s => s.textContent?.trim() ?? '').filter((t): t is string => !!t)
     );
 
-    const canonical = await page.$eval('link[rel="canonical"]', el => el.getAttribute('href')).catch(() => null);
-    const lang = await page.$eval('html', el => el.getAttribute('lang')).catch(() => null);
+    const canonical = await page.$eval('link[rel="canonical"]', (el: Element) => el.getAttribute('href')).catch(() => null);
+    const lang: string | null = await page.$eval('html', (el: Element) => el.getAttribute('lang')).catch(() => null);
 
     return {
       title: title || null,

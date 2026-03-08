@@ -5,7 +5,7 @@ import {
   ListToolsRequestSchema,
   Tool
 } from '@modelcontextprotocol/sdk/types.js';
-import { Scanner, type ScanConfig } from '../scanner/index.js';
+import { Scanner, type ScanConfig, type ScanResults } from '../scanner/index.js';
 import { DetectorRegistry, JavaScriptErrorsDetector, NetworkErrorsDetector, BrokenAssetsDetector, AccessibilityDetector, WebVitalsDetector, MixedContentDetector, BrokenLinksDetector, ConsoleWarningsDetector, SeoDetector, PerformanceDetector } from '../detectors/index.js';
 import { validateReproducibility } from '../determinism/replayer.js';
 import { diffScans, formatDiff } from '../determinism/diff.js';
@@ -303,9 +303,9 @@ export class ReproMcpServer {
   private async handleDiff(args: DiffScansArgs) {
     try {
       // Load scan results
-      const baseline = JSON.parse(await fs.readFile(args.baselinePath, 'utf-8'));
-      const comparison = JSON.parse(await fs.readFile(args.comparisonPath, 'utf-8'));
-      
+      const baseline = JSON.parse(await fs.readFile(args.baselinePath, 'utf-8')) as ScanResults;
+      const comparison = JSON.parse(await fs.readFile(args.comparisonPath, 'utf-8')) as ScanResults;
+
       // Compute diff
       const diff = diffScans(baseline, comparison);
       const formatted = formatDiff(diff);

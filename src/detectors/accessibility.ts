@@ -44,8 +44,9 @@ export class AccessibilityDetector extends BaseDetector {
       // Get violations directly without throwing
       const accessibilityScanResults = await page.evaluate(() => {
         // @ts-expect-error - axe is injected globally
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         return globalThis.axe.run() as Promise<AxeResults>;
-      }) as AxeResults;
+      });
 
       const violations: AxeViolation[] = accessibilityScanResults.violations || [];
 

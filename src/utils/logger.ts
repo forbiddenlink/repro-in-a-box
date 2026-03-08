@@ -103,7 +103,7 @@ export class Logger {
   /**
    * Log error message with optional error object
    */
-  error(message: string, error?: Error | unknown, context?: Record<string, unknown>): void {
+  error(message: string, error?: unknown, context?: Record<string, unknown>): void {
     const err = error instanceof Error ? error : new Error(String(error));
     this.log(LogLevel.ERROR, message, err, context);
   }
@@ -159,7 +159,6 @@ export class Logger {
    */
   private outputToConsole(entry: LogEntry): void {
     const { message, level, error, context, duration } = entry;
-    const isDev = process.env.NODE_ENV === 'development';
 
     // Build prefix
     let prefix = '';
@@ -331,7 +330,7 @@ class ChildLogger extends Logger {
     super.warn(message, { ...this.context, ...context });
   }
 
-  error(message: string, error?: Error | unknown, context?: Record<string, unknown>): void {
+  error(message: string, error?: unknown, context?: Record<string, unknown>): void {
     super.error(message, error, { ...this.context, ...context });
   }
 }

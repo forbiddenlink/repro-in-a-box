@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { BaseDetector, IssueCategory, IssueSeverity, type DetectorConfig } from './base.js';
+import { BaseDetector, IssueCategory, IssueSeverity, type DetectorConfig, type Issue } from './base.js';
 
 /**
  * Detector for JavaScript errors, console errors, and unhandled rejections
@@ -45,6 +45,7 @@ export class JavaScriptErrorsDetector extends BaseDetector {
     
     // Inject script to capture unhandled rejections
     await page.addInitScript(() => {
+      /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment */
       (globalThis as any).__reproUnhandledRejections = [];
       (globalThis as any).addEventListener('unhandledrejection', (event: any) => {
         (globalThis as any).__reproUnhandledRejections.push({
@@ -52,13 +53,15 @@ export class JavaScriptErrorsDetector extends BaseDetector {
           stack: event.reason?.stack || '',
           timestamp: Date.now()
         });
+        /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment */
       });
     });
   }
   
-  async scan(page: Page, _config?: DetectorConfig): Promise<any[]> {
+  async scan(page: Page, _config?: DetectorConfig): Promise<Issue[]> {
     // Retrieve unhandled rejections from the page
     const rejections = await page.evaluate(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       return ((globalThis as any).__reproUnhandledRejections || []) as Array<{
         reason: string;
         stack: string;

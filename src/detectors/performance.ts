@@ -85,11 +85,11 @@ export class PerformanceDetector extends BaseDetector {
 
   private async checkRenderBlockingScripts(page: Page, url: string): Promise<void> {
     try {
-      const blockingScripts = await page.$$eval('head script[src]', (scripts) =>
+      const blockingScripts = await page.$$eval('head script[src]', (scripts: HTMLScriptElement[]) =>
         scripts
           .filter((s) => !s.async && !s.defer)
           .map((s) => s.getAttribute('src') || '')
-          .filter((src) => src)
+          .filter((src): src is string => !!src)
       );
 
       for (const scriptSrc of blockingScripts) {
@@ -108,14 +108,14 @@ export class PerformanceDetector extends BaseDetector {
 
   private async checkRenderBlockingStyles(page: Page, url: string): Promise<void> {
     try {
-      const blockingStyles = await page.$$eval('link[rel="stylesheet"]', (links) =>
+      const blockingStyles = await page.$$eval('link[rel="stylesheet"]', (links: HTMLLinkElement[]) =>
         links
           .filter((l) => {
             const media = l.getAttribute('media');
             return !media || (media !== 'print' && media !== 'none');
           })
           .map((l) => l.getAttribute('href') || '')
-          .filter((href) => href)
+          .filter((href): href is string => !!href)
       );
 
       for (const styleSrc of blockingStyles) {

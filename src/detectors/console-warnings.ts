@@ -61,7 +61,7 @@ export class ConsoleWarningsDetector extends BaseDetector {
     return Promise.resolve();
   }
 
-  async scan(page: Page, _config?: DetectorConfig): Promise<Issue[]> {
+  async scan(_page: Page, _config?: DetectorConfig): Promise<Issue[]> {
     // Process collected warnings
     for (const warning of this.warnings) {
       const severity = this.categorizeWarning(warning.message);

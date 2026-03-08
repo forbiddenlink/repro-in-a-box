@@ -549,8 +549,16 @@ function generateIssuesByCategory(results: ScanResults): string {
     `;
   }
 
-  const issuesByCategory: Record<string, any[]> = {};
-  
+  interface IssueWithPage {
+    category: string;
+    severity: string;
+    message: string;
+    details?: unknown;
+    pageUrl: string;
+  }
+
+  const issuesByCategory: Record<string, IssueWithPage[]> = {};
+
   for (const page of results.pages) {
     for (const detectorResult of page.detectorResults) {
       for (const issue of detectorResult.issues) {

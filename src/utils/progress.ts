@@ -7,7 +7,7 @@ export type ProgressFormat = 'simple' | 'detailed' | 'minimal';
 export interface ProgressEvent {
   type: 'page-started' | 'page-completed' | 'issue-found' | 'detector-started' | 'detector-completed' | 'scan-completed';
   timestamp: Date;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export interface ProgressMetrics {
@@ -198,7 +198,7 @@ export class ProgressReporter {
   /**
    * Emit progress event to all listeners
    */
-  private emitEvent(type: ProgressEvent['type'], data: Record<string, any>): void {
+  private emitEvent(type: ProgressEvent['type'], data: Record<string, unknown>): void {
     const event: ProgressEvent = { type, timestamp: new Date(), data };
     const listeners = this.listeners.get(type);
     if (listeners) {

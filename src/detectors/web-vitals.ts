@@ -1,6 +1,13 @@
 import type { Page } from '@playwright/test';
 import { BaseDetector, IssueCategory, IssueSeverity, type DetectorConfig, type Issue } from './base.js';
 
+// Extend Window interface for web-vitals custom property
+declare global {
+  interface Window {
+    __webVitalsReady?: unknown[];
+  }
+}
+
 /**
  * Web Vitals metrics
  */
@@ -34,10 +41,10 @@ export class WebVitalsDetector extends BaseDetector {
       // Note: page.evaluate runs in browser context where document/window exist
       const metrics = await page.evaluate(() => {
         return new Promise<WebVitalsMetric[]>((resolve) => {
+          /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment */
           const collectedMetrics: WebVitalsMetric[] = [];
 
-          // @ts-expect-error - document exists in browser context
-          const script = document.createElement('script') as HTMLScriptElement;
+          const script = document.createElement('script');
           script.type = 'module';
           script.textContent = `
             import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
@@ -70,13 +77,10 @@ export class WebVitalsDetector extends BaseDetector {
             });
           `;
 
-          // @ts-expect-error - document exists in browser context
           document.head.appendChild(script);
 
           // Wait for metrics to be collected
           const checkInterval = setInterval(() => {
-            // @ts-expect-error - window exists in browser context
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const ready = window.__webVitalsReady;
             if (ready) {
               clearInterval(checkInterval);
@@ -89,10 +93,11 @@ export class WebVitalsDetector extends BaseDetector {
             clearInterval(checkInterval);
             resolve(collectedMetrics);
           }, 2000);
+          /* eslint-enable */
         });
       });
 
-      this.metrics = metrics as WebVitalsMetric[];
+      this.metrics = metrics;
       
       // Convert poor-rated metrics to issues
       for (const metric of this.metrics) {

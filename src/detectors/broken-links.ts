@@ -45,12 +45,14 @@ export class BrokenLinksDetector extends BaseDetector {
   async scan(page: Page, _config?: DetectorConfig): Promise<Issue[]> {
     try {
       // Extract all links from the page using $$eval for proper typing
-      const links = await page.$$eval('a[href]', (anchors) =>
-        anchors.map((a) => ({
-          href: (a as { href?: string }).href ?? '',
-          text: a.textContent?.trim() ?? '',
-          rel: a.getAttribute('rel') ?? ''
-        }))
+      const links = await page.$$eval(
+        'a[href]',
+        (anchors: Element[]) =>
+          anchors.map((a) => ({
+            href: (a as unknown as { href: string }).href ?? '',
+            text: a.textContent?.trim() ?? '',
+            rel: a.getAttribute('rel') ?? ''
+          }))
       );
       
       // Check each link (limited to avoid long scan times)
@@ -97,7 +99,7 @@ export class BrokenLinksDetector extends BaseDetector {
               )
             );
           }
-        } catch (error) {
+        } catch (err: unknown) {
           // Network error, timeout, or DNS failure
           this.addIssue(
             this.createIssue(
@@ -109,7 +111,7 @@ export class BrokenLinksDetector extends BaseDetector {
                 details: JSON.stringify({
                   linkText: link.text,
                   linkUrl: link.href,
-                  error: error instanceof Error ? error.message : String(error)
+                  error: err instanceof Error ? err.message : String(err)
                 }, null, 2)
               }
             )
@@ -118,8 +120,8 @@ export class BrokenLinksDetector extends BaseDetector {
       }
       
       return this.issues;
-    } catch (error) {
-      console.error('Failed to check links:', error);
+    } catch (err: unknown) {
+      console.error('Failed to check links:', err);
       return this.issues;
     }
   }

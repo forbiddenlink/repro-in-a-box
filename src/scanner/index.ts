@@ -137,19 +137,25 @@ export class Scanner {
     this.browser = await chromium.launch({ headless: config.headless ?? true });
     
     // Create context with HAR recording if enabled
-    const contextOptions: any = {};
-    
+    interface ContextOptions {
+      recordHar?: {
+        path: string;
+        mode: 'minimal' | 'full';
+      };
+    }
+    const contextOptions: ContextOptions = {};
+
     if (config.recordHar && config.harPath) {
       // Ensure output directory exists
       const harDir = path.dirname(config.harPath);
       await fs.mkdir(harDir, { recursive: true });
-      
+
       contextOptions.recordHar = {
         path: config.harPath,
         mode: 'minimal', // or 'full' for complete recording
       };
     }
-    
+
     this.context = await this.browser.newContext(contextOptions);
     this.page = await this.context.newPage();
     
@@ -307,9 +313,7 @@ export class Scanner {
         await this.context.clearCookies();
         // Clear browser storage (runs in browser context where localStorage is available)
         await page.evaluate(() => {
-          // @ts-expect-error - localStorage and sessionStorage are available in browser context
           localStorage.clear();
-          // @ts-expect-error - sessionStorage is available in browser context
           sessionStorage.clear();
         }).catch(() => {
           // Ignore if page evaluation fails

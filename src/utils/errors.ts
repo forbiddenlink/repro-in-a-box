@@ -171,9 +171,11 @@ export function handleError(error: unknown, context?: Record<string, unknown>): 
 /**
  * Wrap an async function to catch and handle errors
  */
-export function withErrorHandler<Args extends any[], R>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function withErrorHandler<Args extends unknown[], R>(
   fn: (...args: Args) => Promise<R>,
   verbose?: boolean
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 ): (...args: Args) => Promise<R | never> {
   return async (...args: Args) => {
     try {
@@ -203,7 +205,7 @@ export function hasErrorCode(error: unknown): error is { code: string; message: 
     error !== null &&
     'code' in error &&
     'message' in error &&
-    typeof (error as any).code === 'string'
+    typeof (error as { code: unknown }).code === 'string'
   );
 }
 
