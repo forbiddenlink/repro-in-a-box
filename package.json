@@ -62,5 +62,6 @@
     "eslint": "^8.57.0",
     "typescript": "^5.9.3",
     "vitest": "^1.6.1"
-  }
+  },
+  "private": true
 }
