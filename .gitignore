@@ -90,3 +90,12 @@ __pycache__/
 test_run/
 supabase/.temp/
 node_modules
+
+# Build output
+.next/
+dist/
+build/
+out/
+
+# Vercel
+.vercel
