@@ -77,3 +77,16 @@ screenshots/
 Network Trash Folder
 Temporary Items
 .apdisk
+.claude
+.claude/
+.playwright-mcp
+.playwright-mcp/
+.history
+playwright-report
+playwright-report/
+__pycache__
+__pycache__/
+.codacy
+test_run/
+supabase/.temp/
+node_modules
