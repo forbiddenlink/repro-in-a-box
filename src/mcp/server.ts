@@ -9,7 +9,16 @@ import { Scanner, type ScanConfig, type ScanResults } from '../scanner/index.js'
 import { DetectorRegistry, JavaScriptErrorsDetector, NetworkErrorsDetector, BrokenAssetsDetector, AccessibilityDetector, WebVitalsDetector, MixedContentDetector, BrokenLinksDetector, ConsoleWarningsDetector, SeoDetector, PerformanceDetector } from '../detectors/index.js';
 import { validateReproducibility } from '../determinism/replayer.js';
 import { diffScans, formatDiff } from '../determinism/diff.js';
+import {
+  SessionRecorder,
+  SessionReplayer,
+  reproduceBug,
+  type RecordedSession,
+  type ReplayResult,
+  type ReproductionResult,
+} from './playwright-integration.js';
 import * as fs from 'fs/promises';
+import * as path from 'path';
 
 /**
  * Constants for MCP server configuration
@@ -51,6 +60,36 @@ interface ValidateReproductionArgs {
 interface DiffScansArgs {
   baselinePath: string;
   comparisonPath: string;
+}
+
+/**
+ * Type-safe arguments for record_session tool
+ */
+interface RecordSessionArgs {
+  url: string;
+  outputDir?: string;
+  screenshots?: boolean;
+  recordHar?: boolean;
+}
+
+/**
+ * Type-safe arguments for replay_session tool
+ */
+interface ReplaySessionArgs {
+  sessionPath: string;
+  selfHealing?: boolean;
+  slowMo?: number;
+  headless?: boolean;
+}
+
+/**
+ * Type-safe arguments for reproduce_bug tool
+ */
+interface ReproduceBugArgs {
+  recordingPath: string;
+  attempts?: number;
+  selfHealing?: boolean;
+  outputDir?: string;
 }
 
 export class ReproMcpServer {
