@@ -158,7 +158,7 @@ export const ElementFingerprintSchema = z.object({
   placeholder: z.string().optional(),
   tagName: z.string(),
   landmarks: z.array(z.string()).optional(),
-  dataAttributes: z.record(z.string()).optional(),
+  dataAttributes: z.record(z.string(), z.string()).optional(),
 });
 
 export const RecordedActionSchema = z.object({
@@ -166,7 +166,7 @@ export const RecordedActionSchema = z.object({
   type: z.nativeEnum(ActionType),
   timestamp: z.number(),
   fingerprint: ElementFingerprintSchema.optional(),
-  params: z.record(z.unknown()),
+  params: z.record(z.string(), z.unknown()),
   screenshotBefore: z.string().optional(),
   screenshotAfter: z.string().optional(),
   duration: z.number().optional(),
@@ -181,7 +181,7 @@ export const RecordedSessionSchema = z.object({
   userAgent: z.string(),
   actions: z.array(RecordedActionSchema),
   harPath: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // ============================================================================
