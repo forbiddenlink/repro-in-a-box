@@ -5,6 +5,33 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.6.0...v2.7.0) (2026-04-13)
+
+
+### Features
+
+* add Console Warnings and SEO detectors (v2.7.0) ([46c636d](https://github.com/forbiddenlink/repro-in-a-box/commit/46c636df9d6ae61b88afcc212443483270496c64))
+* add Performance detector for render-blocking and large asset detection (v2.8.0) ([6dcb2cc](https://github.com/forbiddenlink/repro-in-a-box/commit/6dcb2cc784d1bb809242d90f7bad6e3d2fd46f2e))
+* add professional HTML report generator ([937a4ab](https://github.com/forbiddenlink/repro-in-a-box/commit/937a4ab330e8cfaf3615533813813cc4e6f9d7dc))
+* add Security and Memory Leak detectors (v2.9.0) ([3ee584b](https://github.com/forbiddenlink/repro-in-a-box/commit/3ee584bdd871ea94205b6cbd0e6269e15acbe462))
+* implement Playwright best practices ([99fc0f8](https://github.com/forbiddenlink/repro-in-a-box/commit/99fc0f88328017c63e254da5c3fa7bb824bcb137))
+* reproduction tool updates ([a6a1ee1](https://github.com/forbiddenlink/repro-in-a-box/commit/a6a1ee130fc45786241a4eb299288ae34eff565d))
+
+
+### Bug Fixes
+
+* add missing chalk dependency ([5320fd7](https://github.com/forbiddenlink/repro-in-a-box/commit/5320fd7b26888d48bfed74059f7b2dbda92762fe))
+* **ci:** add --legacy-peer-deps flag to handle eslint peer dependency conflicts ([3e59d97](https://github.com/forbiddenlink/repro-in-a-box/commit/3e59d97e6b4b45868ef28854a27675d08467d0d9))
+* improve type safety and reduce ESLint warnings ([54e3e2f](https://github.com/forbiddenlink/repro-in-a-box/commit/54e3e2f55e60bedba937ba80be3871e9ec387928))
+* improve TypeScript type safety and ESLint configuration ([34b25ec](https://github.com/forbiddenlink/repro-in-a-box/commit/34b25ec95942efaf50c0cdcee99983df1ff1d809))
+* patch 9 security vulnerabilities ([28cd3a6](https://github.com/forbiddenlink/repro-in-a-box/commit/28cd3a6e2b6a348038f11000bb41ea757720a269))
+* regenerate package-lock.json for CI ([d47c84c](https://github.com/forbiddenlink/repro-in-a-box/commit/d47c84ca47ea5d91d39b8e0c23a7d4a8a0431611))
+* remove conflicting npm overrides (pnpm overrides sufficient) ([2702546](https://github.com/forbiddenlink/repro-in-a-box/commit/27025461010f5bd9e912a2cfab3741c2d9723e84))
+* remove dist/ from tracking and add .codacy/ to gitignore ([52e0761](https://github.com/forbiddenlink/repro-in-a-box/commit/52e0761f9ed97c794c83c28e435b329554f4ecd0))
+* resolve Web Vitals dynamic import error ([9e71d9d](https://github.com/forbiddenlink/repro-in-a-box/commit/9e71d9daecf87f6981c7f282bbd34a72fb442834))
+* switch CI to pnpm, remove stale package-lock.json ([e52a119](https://github.com/forbiddenlink/repro-in-a-box/commit/e52a11917b4e562132df57e2c75c4d2fec3a904b))
+* update z.record() to use 2-arg form for Zod v4 compatibility ([b4f83b9](https://github.com/forbiddenlink/repro-in-a-box/commit/b4f83b93c624f93f1b6f0e99c0b655522f4b25e6))
+
 ## [Unreleased]
 
 ### Added
