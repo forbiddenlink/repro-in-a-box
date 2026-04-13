@@ -100,3 +100,4 @@ out/
 .vercel
 
 # Next.js
+package-lock.json
