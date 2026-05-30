@@ -42,22 +42,22 @@
   },
   "homepage": "https://github.com/forbiddenlink/repro-in-a-box#readme",
   "dependencies": {
-    "@axe-core/playwright": "^4.11.1",
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@axe-core/playwright": "^4.11.3",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@playwright/test": "^1.50.0",
     "@types/adm-zip": "^0.5.7",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.5.17",
     "axe-playwright": "^2.2.2",
     "chalk": "^5.6.2",
     "commander": "^12.1.0",
     "inquirer": "^9.3.8",
     "playwright": "^1.50.0",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.3",
     "web-vitals": "^5.1.0",
-    "zod": "^4.3.6"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.9",
+    "@biomejs/biome": "^2.4.15",
     "@types/inquirer": "^9.0.9",
     "@types/node": "^25.5.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
