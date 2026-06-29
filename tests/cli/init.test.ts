@@ -90,19 +90,19 @@ describe('Init Command', () => {
     });
 
     it('should prompt user with inquirer', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       expect(inquirer.prompt).toHaveBeenCalled();
     });
 
     it('should write config file', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       expect(fs.writeFileSync).toHaveBeenCalled();
     });
 
     it('should write JSON config file by default', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       expect(fs.writeFileSync).toHaveBeenCalled();
       const [filePath, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
@@ -111,7 +111,7 @@ describe('Init Command', () => {
     });
 
     it('should write JS config file when --js flag is used', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init', '--js']);
+      await initCommand.parseAsync(['node', 'test', '--js']);
 
       expect(fs.writeFileSync).toHaveBeenCalled();
       const [filePath, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
@@ -120,7 +120,7 @@ describe('Init Command', () => {
     });
 
     it('should include detectors in config', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const [, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
       const config = parseConfig(String(content));
@@ -129,7 +129,7 @@ describe('Init Command', () => {
     });
 
     it('should include crawler settings in config', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const [, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
       const config = parseConfig(String(content));
@@ -140,7 +140,7 @@ describe('Init Command', () => {
     });
 
     it('should include output settings in config', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const [, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
       const config = parseConfig(String(content));
@@ -150,7 +150,7 @@ describe('Init Command', () => {
     });
 
     it('should include thresholds in config', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const [, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
       const config = parseConfig(String(content));
@@ -159,7 +159,7 @@ describe('Init Command', () => {
     });
 
     it('should include bundle settings in config', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const [, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
       const config = parseConfig(String(content));
@@ -175,7 +175,7 @@ describe('Init Command', () => {
         includeScreenshots: undefined,
       });
 
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const [, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
       const config = parseConfig(String(content));
@@ -185,13 +185,13 @@ describe('Init Command', () => {
     });
 
     it('should print success message after writing config', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Configuration saved'));
     });
 
     it('should format JSON with proper indentation', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const [, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
       const contentStr = String(content);
@@ -201,7 +201,7 @@ describe('Init Command', () => {
     });
 
     it('should convert .json to .js when --js flag used', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init', '--js']);
+      await initCommand.parseAsync(['node', 'test', '--js']);
 
       const [filePath, content] = vi.mocked(fs.writeFileSync).mock.calls[0];
       expect(String(filePath)).toMatch(/\.js$/);
@@ -225,7 +225,7 @@ describe('Init Command', () => {
     });
 
     it('should pass prompt questions to inquirer', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       expect(inquirer.prompt).toHaveBeenCalled();
       const promptArg = vi.mocked(inquirer.prompt).mock.calls[0][0];
@@ -234,7 +234,7 @@ describe('Init Command', () => {
     });
 
     it('should include detectors checkbox question', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const promptArg = vi.mocked(inquirer.prompt).mock.calls[0][0] as Array<{ name: string; type: string }>;
       const detectorsQ = promptArg.find(q => q.name === 'detectors');
@@ -243,7 +243,7 @@ describe('Init Command', () => {
     });
 
     it('should include maxDepth number question', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const promptArg = vi.mocked(inquirer.prompt).mock.calls[0][0] as Array<{ name: string; type: string }>;
       const maxDepthQ = promptArg.find(q => q.name === 'maxDepth');
@@ -252,7 +252,7 @@ describe('Init Command', () => {
     });
 
     it('should include outputFormat list question', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const promptArg = vi.mocked(inquirer.prompt).mock.calls[0][0] as Array<{ name: string; type: string }>;
       const formatQ = promptArg.find(q => q.name === 'outputFormat');
@@ -261,7 +261,7 @@ describe('Init Command', () => {
     });
 
     it('should include bundleEnabled confirm question', async () => {
-      await initCommand.parseAsync(['node', 'test', 'init']);
+      await initCommand.parseAsync(['node', 'test']);
 
       const promptArg = vi.mocked(inquirer.prompt).mock.calls[0][0] as Array<{ name: string; type: string }>;
       const bundleQ = promptArg.find(q => q.name === 'bundleEnabled');
