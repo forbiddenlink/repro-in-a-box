@@ -1,6 +1,6 @@
 {
   "name": "repro-in-a-box",
-  "version": "2.8.0",
+  "version": "2.7.0",
   "description": "Production-grade automated bug detection with 10 detectors and 215+ tests. Find bugs with Playwright, configure detectors, record HAR files, validate reproducibility, and integrate with Claude Desktop via MCP.",
   "type": "module",
   "main": "dist/cli/index.js",
