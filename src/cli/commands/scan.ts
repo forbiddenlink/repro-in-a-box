@@ -18,6 +18,7 @@ import { Scanner, type ScanConfig } from '../../scanner/index.js';
 import { createBundle, type BundleOptions } from '../../bundler/index.js';
 import { loadConfig, mergeConfigs, DEFAULT_CONFIG, type ReproConfig, type FullReproConfig } from '../../config/index.js';
 import { generateHtmlReport } from '../../reporters/html-reporter.js';
+import { generateMarkdownReport } from '../../reporters/markdown-reporter.js';
 import { logger, createChildLogger } from '../../utils/logger.js';
 import { ValidationError, handleError } from '../../utils/errors.js';
 
@@ -28,7 +29,7 @@ export const scanCommand = new Command('scan')
   .option('-p, --max-pages <number>', 'Maximum pages to scan')
   .option('-r, --rate-limit <ms>', 'Rate limit between requests')
   .option('-o, --output <path>', 'Output file path')
-  .option('-f, --format <type>', 'Output format (json, html)', 'json')
+  .option('-f, --format <type>', 'Output format (json, html, markdown)', 'json')
   .option('--no-headless', 'Run browser in visible mode')
   .option('--same-domain-only', 'Only crawl pages on the same domain')
   .option('-b, --bundle', 'Create reproducible bundle (ZIP with HAR + screenshots)')
@@ -200,12 +201,16 @@ export const scanCommand = new Command('scan')
       
       // Save scan results
       const format = options.format || 'json';
-      const extension = format === 'html' ? '.html' : '.json';
+      const extension =
+        format === 'html' ? '.html' : format === 'markdown' || format === 'md' ? '.md' : '.json';
       const outputPath = options.output || join(outputDir, `scan-results${extension}`);
-      
+
       if (format === 'html') {
         generateHtmlReport(results, outputPath);
         scanLogger.info(`💾 HTML report saved`, { path: outputPath });
+      } else if (format === 'markdown' || format === 'md') {
+        generateMarkdownReport(results, outputPath);
+        scanLogger.info(`💾 Markdown report saved`, { path: outputPath });
       } else {
         writeFileSync(outputPath, JSON.stringify(results, null, 2));
         scanLogger.info(`💾 Results saved`, { path: outputPath });

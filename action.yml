@@ -1,0 +1,133 @@
+name: 'Repro-in-a-Box Scan'
+description: 'Scan a URL for bugs and upload HTML/Markdown reports as CI artifacts'
+author: 'forbiddenlink'
+
+branding:
+  icon: 'search'
+  color: 'blue'
+
+inputs:
+  url:
+    description: 'URL to scan'
+    required: true
+  max-pages:
+    description: 'Maximum pages to crawl'
+    required: false
+    default: '10'
+  max-depth:
+    description: 'Maximum crawl depth'
+    required: false
+    default: '2'
+  format:
+    description: 'Human report format: html or markdown (JSON results always written)'
+    required: false
+    default: 'html'
+  fail-on-issues:
+    description: 'Fail the job when any issues are found'
+    required: false
+    default: 'false'
+  output-dir:
+    description: 'Directory for report artifacts'
+    required: false
+    default: 'repro-results'
+
+outputs:
+  report-path:
+    description: 'Path to the human-readable report (html or markdown)'
+    value: ${{ steps.scan.outputs.report-path }}
+  json-path:
+    description: 'Path to the JSON scan results'
+    value: ${{ steps.scan.outputs.json-path }}
+  issue-count:
+    description: 'Total issues found'
+    value: ${{ steps.scan.outputs.issue-count }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v7
+      with:
+        node-version: '20'
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v6
+      with:
+        version: 9
+
+    - name: Install and build Repro-in-a-Box
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: |
+        pnpm install --frozen-lockfile
+        pnpm run build
+        pnpm exec playwright install chromium --with-deps
+
+    - name: Run scan
+      id: scan
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        REPRO_URL: ${{ inputs.url }}
+        REPRO_MAX_PAGES: ${{ inputs.max-pages }}
+        REPRO_MAX_DEPTH: ${{ inputs.max-depth }}
+        REPRO_FORMAT: ${{ inputs.format }}
+        REPRO_OUT_DIR: ${{ inputs.output-dir }}
+        REPRO_FAIL: ${{ inputs.fail-on-issues }}
+      run: |
+        set -euo pipefail
+        mkdir -p "$REPRO_OUT_DIR"
+
+        JSON_PATH="$REPRO_OUT_DIR/scan-results.json"
+        case "$REPRO_FORMAT" in
+          markdown|md)
+            REPORT_PATH="$REPRO_OUT_DIR/scan-report.md"
+            FORMAT="markdown"
+            ;;
+          *)
+            REPORT_PATH="$REPRO_OUT_DIR/scan-report.html"
+            FORMAT="html"
+            ;;
+        esac
+
+        node "$ACTION_PATH/dist/cli/index.js" scan "$REPRO_URL" \
+          --max-pages "$REPRO_MAX_PAGES" \
+          --max-depth "$REPRO_MAX_DEPTH" \
+          --format json \
+          --output "$JSON_PATH"
+
+        ACTION_PATH="$ACTION_PATH" JSON_PATH="$JSON_PATH" REPORT_PATH="$REPORT_PATH" FORMAT="$FORMAT" \
+        node --input-type=module <<'EOF'
+        import { readFileSync } from 'fs';
+        import { pathToFileURL } from 'url';
+        const actionPath = process.env.ACTION_PATH;
+        const htmlMod = await import(pathToFileURL(`${actionPath}/dist/reporters/html-reporter.js`).href);
+        const mdMod = await import(pathToFileURL(`${actionPath}/dist/reporters/markdown-reporter.js`).href);
+        const results = JSON.parse(readFileSync(process.env.JSON_PATH, 'utf8'));
+        if (process.env.FORMAT === 'markdown') {
+          mdMod.generateMarkdownReport(results, process.env.REPORT_PATH);
+        } else {
+          htmlMod.generateHtmlReport(results, process.env.REPORT_PATH);
+        }
+        EOF
+
+        ISSUE_COUNT=$(node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync(process.argv[1],'utf8')); process.stdout.write(String(r.summary?.totalIssues ?? 0))" "$JSON_PATH")
+
+        echo "report-path=$REPORT_PATH" >> "$GITHUB_OUTPUT"
+        echo "json-path=$JSON_PATH" >> "$GITHUB_OUTPUT"
+        echo "issue-count=$ISSUE_COUNT" >> "$GITHUB_OUTPUT"
+        echo "Report: $REPORT_PATH · Issues: $ISSUE_COUNT"
+
+        if [[ "$REPRO_FAIL" == "true" && "$ISSUE_COUNT" != "0" ]]; then
+          echo "Failing because issues were found ($ISSUE_COUNT)" >&2
+          exit 1
+        fi
+
+    - name: Upload report artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: repro-scan-report
+        path: |
+          ${{ steps.scan.outputs.report-path }}
+          ${{ steps.scan.outputs.json-path }}
+        if-no-files-found: warn

@@ -22,10 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 13 new tests for Memory Leak detector
 - Total detectors increased to **12**
 - Total tests increased to **247**
+- **`repro diff` CLI** — fully wired to `diffScans` (was a stub); supports `--json` and `-o`
+- **HTML report design system** — OKLCH tokens, IBM Plex typography, light/dark theme, severity chips, category filter, search, keyboard shortcuts (`/`, `j`/`k`, `c`, `d`), copy-issue
+- **Markdown report** — `--format markdown` for PR comments / CI
+- **GitHub Action** — composite `action.yml` scans a URL and uploads HTML/Markdown + JSON artifacts
 
 ### Changed
 - Fixed 23% of ESLint warnings (73 → 56 warnings) through proper typing
 - Improved type safety across multiple detector files
+- Redesigned HTML scan report away from generic gray card layout toward a forensic “evidence dossier” aesthetic
 
 ---
 

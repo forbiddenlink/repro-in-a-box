@@ -48,7 +48,7 @@ export const ConfigSchema = z.object({
 
   // Output configuration
   output: z.object({
-    format: z.enum(['json', 'text', 'csv', 'html']).optional()
+    format: z.enum(['json', 'text', 'csv', 'html', 'markdown']).optional()
       .describe('Output format (default: text)'),
     path: z.string().optional()
       .describe('Output directory path (default: ./repro-results)'),

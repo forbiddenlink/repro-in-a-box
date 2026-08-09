@@ -38,7 +38,7 @@ describe('HTML Reporter', () => {
     expect(existsSync(tempFile)).toBe(true);
     const html = readFileSync(tempFile, 'utf8');
     expect(html).toContain('<!DOCTYPE html>');
-    expect(html).toContain('<html lang="en">');
+    expect(html).toContain('lang="en"');
     expect(html).toContain('Scan Report');
   });
 
@@ -64,7 +64,7 @@ describe('HTML Reporter', () => {
     expect(html).toContain('10</div>'); // totalIssues
     expect(html).toContain('3</div>'); // errors
     expect(html).toContain('7</div>'); // warnings
-    expect(html).toContain('5.2s</div>'); // duration
+    expect(html).toContain('5.2s'); // duration
   });
 
   it('should show "no issues" message when scan is clean', () => {
@@ -268,6 +268,60 @@ describe('HTML Reporter', () => {
     expect(html).toContain('font-family');
     expect(html).toContain('background');
     expect(html).toContain('--gray-');
+    expect(html).toContain('--ink');
+    expect(html).toContain('--signal');
+    expect(html).toContain('data-theme');
+  });
+
+  it('should include interactive filter controls when issues exist', () => {
+    const mockPage: PageScanResult = {
+      url: 'https://example.com',
+      depth: 0,
+      crawledAt: 0,
+      detectorResults: [
+        {
+          detectorId: 'accessibility',
+          detectorName: 'Accessibility',
+          issues: [
+            {
+              severity: 'error',
+              category: 'accessibility',
+              message: 'Missing alt text',
+              details: {},
+            },
+          ],
+        },
+      ],
+      summary: {
+        totalIssues: 1,
+        byCategory: { accessibility: 1 },
+        bySeverity: { error: 1 },
+      },
+    };
+
+    const mockResults: ScanResults = {
+      timestamp: '2024-01-01T00:00:00.000Z',
+      url: 'https://example.com',
+      config: {} as any,
+      pages: [mockPage],
+      summary: {
+        pagesScanned: 1,
+        totalIssues: 1,
+        duration: '1.0s',
+        byCategory: { accessibility: 1 },
+        bySeverity: { error: 1 },
+      },
+    };
+
+    generateHtmlReport(mockResults, tempFile);
+
+    const html = readFileSync(tempFile, 'utf8');
+    expect(html).toContain('issue-search');
+    expect(html).toContain('data-sev="error"');
+    expect(html).toContain('category-filter');
+    expect(html).toContain('theme-toggle');
+    expect(html).toContain('copy-btn');
+    expect(html).toContain('data-copy=');
   });
 
   it('should display bar chart for issue categories', () => {

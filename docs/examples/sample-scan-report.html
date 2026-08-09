@@ -1,23 +1,10 @@
-import type { ScanResults } from '../scanner/index.js';
-import { writeFileSync } from 'fs';
-
-/**
- * Generate a self-contained HTML scan report.
- * Design: forensic evidence dossier — see .impeccable.md
- */
-export function generateHtmlReport(results: ScanResults, outputPath: string): void {
-  const errorCount = results.summary.bySeverity.error || 0;
-  const warningCount = results.summary.bySeverity.warning || 0;
-  const infoCount = results.summary.bySeverity.info || 0;
-  const categories = Object.keys(results.summary.byCategory).sort();
-
-  const html = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <title>Scan Report — ${escapeHtml(results.url)}</title>
+  <title>Scan Report — https://example.com</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -921,11 +908,8 @@ export function generateHtmlReport(results: ScanResults, outputPath: string): vo
       <div>
         <div class="brand">Repro-in-a-Box</div>
         <h1>Scan Report</h1>
-        <div class="url">${escapeHtml(results.url)}</div>
-        <div class="timestamp">Scanned ${escapeHtml(new Date(results.timestamp).toLocaleString('en-US', {
-          dateStyle: 'medium',
-          timeStyle: 'short'
-        }))}</div>
+        <div class="url">https://example.com</div>
+        <div class="timestamp">Scanned Jul 29, 2026, 4:00 PM</div>
       </div>
       <div class="masthead-actions">
         <span class="theme-label" id="theme-label">Light</span>
@@ -939,56 +923,104 @@ export function generateHtmlReport(results: ScanResults, outputPath: string): vo
     <div class="summary-strip">
       <div class="summary-hero">
         <div class="label">Total Issues</div>
-        <div class="value ${results.summary.totalIssues === 0 ? 'clean' : 'has-issues'}">${results.summary.totalIssues}</div>
-        <div class="meta">${results.summary.pagesScanned} page${results.summary.pagesScanned === 1 ? '' : 's'} · ${escapeHtml(results.summary.duration)}</div>
+        <div class="value has-issues">5</div>
+        <div class="meta">2 pages · 3.4s</div>
       </div>
       <div class="metrics-row">
         <div class="metric">
           <div class="metric-label">Pages Scanned</div>
-          <div class="metric-value">${results.summary.pagesScanned}</div>
+          <div class="metric-value">2</div>
         </div>
         <div class="metric error">
           <div class="metric-label">Errors</div>
-          <div class="metric-value">${errorCount}</div>
+          <div class="metric-value">2</div>
         </div>
         <div class="metric warning">
           <div class="metric-label">Warnings</div>
-          <div class="metric-value">${warningCount}</div>
+          <div class="metric-value">2</div>
         </div>
         <div class="metric info">
           <div class="metric-label">Info</div>
-          <div class="metric-value">${infoCount}</div>
+          <div class="metric-value">1</div>
         </div>
       </div>
-      ${results.summary.totalIssues > 0 ? `
+      
       <div class="severity-stack" aria-hidden="true">
-        <span class="seg-error" style="flex:${errorCount}"></span>
-        <span class="seg-warning" style="flex:${warningCount}"></span>
-        <span class="seg-info" style="flex:${infoCount}"></span>
-      </div>` : ''}
+        <span class="seg-error" style="flex:2"></span>
+        <span class="seg-warning" style="flex:2"></span>
+        <span class="seg-info" style="flex:1"></span>
+      </div>
     </div>
 
-    ${results.summary.totalIssues > 0 ? `
+    
     <div class="toolbar" role="search" aria-label="Filter issues">
       <div class="search-wrap">
         <input type="search" id="issue-search" placeholder="Filter by message, category, or URL…" autocomplete="off" spellcheck="false">
       </div>
       <div class="chip-group" role="group" aria-label="Severity">
-        <button type="button" class="chip" data-sev="all" aria-pressed="true">All <span class="count">${results.summary.totalIssues}</span></button>
-        <button type="button" class="chip" data-sev="error" aria-pressed="false">Error <span class="count">${errorCount}</span></button>
-        <button type="button" class="chip" data-sev="warning" aria-pressed="false">Warning <span class="count">${warningCount}</span></button>
-        <button type="button" class="chip" data-sev="info" aria-pressed="false">Info <span class="count">${infoCount}</span></button>
+        <button type="button" class="chip" data-sev="all" aria-pressed="true">All <span class="count">5</span></button>
+        <button type="button" class="chip" data-sev="error" aria-pressed="false">Error <span class="count">2</span></button>
+        <button type="button" class="chip" data-sev="warning" aria-pressed="false">Warning <span class="count">2</span></button>
+        <button type="button" class="chip" data-sev="info" aria-pressed="false">Info <span class="count">1</span></button>
       </div>
       <select class="category-select" id="category-filter" aria-label="Category">
         <option value="">All categories</option>
-        ${categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
+        <option value="accessibility">accessibility</option><option value="performance">performance</option><option value="security">security</option><option value="seo">seo</option>
       </select>
-      <div class="filter-meta"><span id="visible-count">${results.summary.totalIssues}</span> showing</div>
-    </div>` : ''}
+      <div class="filter-meta"><span id="visible-count">5</span> showing</div>
+    </div>
 
-    ${generateIssuesByCategory(results)}
-    ${generateDistributionCharts(results)}
-    ${generatePageSummary(results)}
+    <div class="section"><div class="section-header"><div class="section-title">Issues</div><div class="section-count">5 total</div></div><table class="issue-table"><thead><tr><th width="100">Severity</th><th width="140">Category</th><th>Message</th><th width="240">URL</th></tr></thead><tbody><tr data-severity="error" data-category="accessibility" data-search="error accessibility image missing alt text https://example.com" data-copy="[error] accessibility: Image missing alt text
+https://example.com" tabindex="0"><td><span class="severity-badge error">error</span></td><td class="category-cell">accessibility</td><td class="message-cell">
+        Image missing alt text
+        <div class="row-actions">
+          <button type="button" class="details-toggle" data-target="issue-0" aria-expanded="false">View details</button>
+          <button type="button" class="copy-btn">Copy</button>
+        </div>
+        <div id="issue-0" class="issue-details" role="region">{
+  &quot;selector&quot;: &quot;img.hero&quot;
+}</div>
+      </td><td class="url-cell">https://example.com</td></tr><tr data-severity="warning" data-category="accessibility" data-search="warning accessibility low contrast on cta https://example.com" data-copy="[warning] accessibility: Low contrast on CTA
+https://example.com" tabindex="0"><td><span class="severity-badge warning">warning</span></td><td class="category-cell">accessibility</td><td class="message-cell">
+        Low contrast on CTA
+        <div class="row-actions">
+          <button type="button" class="details-toggle" data-target="issue-1" aria-expanded="false">View details</button>
+          <button type="button" class="copy-btn">Copy</button>
+        </div>
+        <div id="issue-1" class="issue-details" role="region">{
+  &quot;ratio&quot;: 2.1
+}</div>
+      </td><td class="url-cell">https://example.com</td></tr><tr data-severity="warning" data-category="performance" data-search="warning performance large javascript bundle (420kb) https://example.com" data-copy="[warning] performance: Large JavaScript bundle (420KB)
+https://example.com" tabindex="0"><td><span class="severity-badge warning">warning</span></td><td class="category-cell">performance</td><td class="message-cell">
+        Large JavaScript bundle (420KB)
+        <div class="row-actions">
+          <button type="button" class="details-toggle" data-target="issue-2" aria-expanded="false">View details</button>
+          <button type="button" class="copy-btn">Copy</button>
+        </div>
+        <div id="issue-2" class="issue-details" role="region">{
+  &quot;url&quot;: &quot;/app.js&quot;
+}</div>
+      </td><td class="url-cell">https://example.com</td></tr><tr data-severity="info" data-category="seo" data-search="info seo meta description is short https://example.com" data-copy="[info] seo: Meta description is short
+https://example.com" tabindex="0"><td><span class="severity-badge info">info</span></td><td class="category-cell">seo</td><td class="message-cell">
+        Meta description is short
+        <div class="row-actions">
+          <button type="button" class="details-toggle" data-target="issue-3" aria-expanded="false">View details</button>
+          <button type="button" class="copy-btn">Copy</button>
+        </div>
+        <div id="issue-3" class="issue-details" role="region">{
+  &quot;length&quot;: 42
+}</div>
+      </td><td class="url-cell">https://example.com</td></tr><tr data-severity="error" data-category="security" data-search="error security missing content-security-policy header https://example.com" data-copy="[error] security: Missing Content-Security-Policy header
+https://example.com" tabindex="0"><td><span class="severity-badge error">error</span></td><td class="category-cell">security</td><td class="message-cell">
+        Missing Content-Security-Policy header
+        <div class="row-actions">
+          <button type="button" class="details-toggle" data-target="issue-4" aria-expanded="false">View details</button>
+          <button type="button" class="copy-btn">Copy</button>
+        </div>
+        <div id="issue-4" class="issue-details" role="region">{}</div>
+      </td><td class="url-cell">https://example.com</td></tr></tbody></table><div class="empty-filter" id="empty-filter">No issues match the current filters.</div></div>
+    <div class="section"><div class="section-header"><div class="section-title">Distribution</div></div><div class="distribution-grid"><div class="distribution-item"><div class="distribution-label">accessibility</div><div class="distribution-bar"><div class="distribution-fill" style="width:40%"></div></div><div class="distribution-value">2</div></div><div class="distribution-item"><div class="distribution-label">performance</div><div class="distribution-bar"><div class="distribution-fill" style="width:20%"></div></div><div class="distribution-value">1</div></div><div class="distribution-item"><div class="distribution-label">seo</div><div class="distribution-bar"><div class="distribution-fill" style="width:20%"></div></div><div class="distribution-value">1</div></div><div class="distribution-item"><div class="distribution-label">security</div><div class="distribution-bar"><div class="distribution-fill" style="width:20%"></div></div><div class="distribution-value">1</div></div></div></div>
+    <div class="section"><div class="section-header"><div class="section-title">Pages</div><div class="section-count">2 scanned</div></div><div class="pages-list"><div class="page-item"><div class="page-url">https://example.com</div><div class="page-meta"><div class="page-depth">Depth 0</div><div class="page-issues has-issues">5 issues</div></div></div><div class="page-item"><div class="page-url">https://example.com/pricing</div><div class="page-meta"><div class="page-depth">Depth 1</div><div class="page-issues clean">Clean</div></div></div></div></div>
 
     <footer>
       <div class="footer-text">
@@ -1187,160 +1219,4 @@ export function generateHtmlReport(results: ScanResults, outputPath: string): vo
     })();
   </script>
 </body>
-</html>`;
-
-  writeFileSync(outputPath, html, 'utf8');
-}
-
-function generateIssuesByCategory(results: ScanResults): string {
-  if (results.summary.totalIssues === 0) {
-    return `
-      <div class="section">
-        <div class="empty-state">
-          <div class="empty-state-title">No Issues Found</div>
-          <div class="empty-state-message">All analyzed pages passed without any detected issues.</div>
-        </div>
-      </div>
-    `;
-  }
-
-  interface IssueWithPage {
-    category: string;
-    severity: string;
-    message: string;
-    details?: unknown;
-    pageUrl: string;
-  }
-
-  const issuesByCategory: Record<string, IssueWithPage[]> = {};
-
-  for (const page of results.pages) {
-    for (const detectorResult of page.detectorResults) {
-      for (const issue of detectorResult.issues) {
-        if (!issuesByCategory[issue.category]) {
-          issuesByCategory[issue.category] = [];
-        }
-        issuesByCategory[issue.category].push({ ...issue, pageUrl: page.url });
-      }
-    }
-  }
-
-  let html = '<div class="section">';
-  html += '<div class="section-header">';
-  html += '<div class="section-title">Issues</div>';
-  html += `<div class="section-count">${results.summary.totalIssues} total</div>`;
-  html += '</div>';
-
-  html += '<table class="issue-table">';
-  html += '<thead><tr>';
-  html += '<th width="100">Severity</th>';
-  html += '<th width="140">Category</th>';
-  html += '<th>Message</th>';
-  html += '<th width="240">URL</th>';
-  html += '</tr></thead>';
-  html += '<tbody>';
-
-  let issueId = 0;
-  for (const [, issues] of Object.entries(issuesByCategory)) {
-    for (const issue of issues.slice(0, 100)) {
-      const id = `issue-${issueId++}`;
-      const searchBlob = escapeHtml(
-        [issue.severity, issue.category, issue.message, issue.pageUrl].join(' ').toLowerCase()
-      );
-      const copyText = escapeHtml(
-        `[${issue.severity}] ${issue.category}: ${issue.message}\n${issue.pageUrl}`
-      );
-      html += `<tr data-severity="${escapeHtml(issue.severity)}" data-category="${escapeHtml(issue.category)}" data-search="${searchBlob}" data-copy="${copyText}" tabindex="0">`;
-      html += `<td><span class="severity-badge ${escapeHtml(issue.severity)}">${escapeHtml(issue.severity)}</span></td>`;
-      html += `<td class="category-cell">${escapeHtml(issue.category)}</td>`;
-      html += `<td class="message-cell">
-        ${escapeHtml(issue.message)}
-        <div class="row-actions">
-          ${issue.details ? `<button type="button" class="details-toggle" data-target="${id}" aria-expanded="false">View details</button>` : ''}
-          <button type="button" class="copy-btn">Copy</button>
-        </div>
-        ${issue.details ? `<div id="${id}" class="issue-details" role="region">${escapeHtml(JSON.stringify(issue.details, null, 2))}</div>` : ''}
-      </td>`;
-      html += `<td class="url-cell">${escapeHtml(issue.pageUrl)}</td>`;
-      html += '</tr>';
-    }
-  }
-
-  html += '</tbody></table>';
-  html += '<div class="empty-filter" id="empty-filter">No issues match the current filters.</div>';
-
-  const remainingIssues = results.summary.totalIssues - 100;
-  if (remainingIssues > 0) {
-    html += `<div style="text-align:center;padding:var(--space-4);color:var(--ink-faint);font-size:13px;">`;
-    html += `${remainingIssues} more issue${remainingIssues !== 1 ? 's' : ''} not shown`;
-    html += '</div>';
-  }
-
-  html += '</div>';
-  return html;
-}
-
-function generateDistributionCharts(results: ScanResults): string {
-  if (results.summary.totalIssues === 0) {
-    return '';
-  }
-
-  let html = '<div class="section">';
-  html += '<div class="section-header">';
-  html += '<div class="section-title">Distribution</div>';
-  html += '</div>';
-
-  html += '<div class="distribution-grid">';
-  for (const [category, count] of Object.entries(results.summary.byCategory)) {
-    const percentage = (count / results.summary.totalIssues) * 100;
-    html += '<div class="distribution-item">';
-    html += `<div class="distribution-label">${escapeHtml(category)}</div>`;
-    html += '<div class="distribution-bar">';
-    html += `<div class="distribution-fill" style="width:${percentage}%"></div>`;
-    html += '</div>';
-    html += `<div class="distribution-value">${count}</div>`;
-    html += '</div>';
-  }
-  html += '</div>';
-
-  html += '</div>';
-  return html;
-}
-
-function generatePageSummary(results: ScanResults): string {
-  let html = '<div class="section">';
-  html += '<div class="section-header">';
-  html += '<div class="section-title">Pages</div>';
-  html += `<div class="section-count">${results.summary.pagesScanned} scanned</div>`;
-  html += '</div>';
-
-  html += '<div class="pages-list">';
-
-  for (const page of results.pages) {
-    const issueCount = page.summary.totalIssues;
-
-    html += '<div class="page-item">';
-    html += `<div class="page-url">${escapeHtml(page.url)}</div>`;
-    html += '<div class="page-meta">';
-    html += `<div class="page-depth">Depth ${page.depth}</div>`;
-    html += `<div class="page-issues ${issueCount === 0 ? 'clean' : 'has-issues'}">`;
-    html += issueCount === 0 ? 'Clean' : `${issueCount} issue${issueCount !== 1 ? 's' : ''}`;
-    html += '</div>';
-    html += '</div>';
-    html += '</div>';
-  }
-
-  html += '</div></div>';
-  return html;
-}
-
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
-  return text.replace(/[&<>"']/g, m => map[m]);
-}
+</html>

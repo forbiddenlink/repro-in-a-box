@@ -13,6 +13,7 @@ Essential guides for using and integrating Repro-in-a-Box:
 - **[Asset Blocking](./guides/asset-blocking.md)** - Performance optimization, usage examples
 - **[Progress Reporting](./guides/progress.md)** - Real-time feedback, formats, integration
 - **[Integration & API](./guides/integration.md)** - Node.js library, CLI, MCP server, CI/CD
+- **[GitHub Action](./guides/github-action.md)** - Composite action for scanning in CI
 - **[Troubleshooting](./guides/troubleshooting.md)** - Common issues, solutions, diagnostics
 
 ### Session History

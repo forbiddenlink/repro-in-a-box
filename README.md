@@ -169,6 +169,9 @@ repro scan https://example.com --max-pages 1 --bundle
 # Generate professional HTML report
 repro scan https://example.com --format html -o report.html
 
+# Markdown report for PRs / CI comments
+repro scan https://example.com --format markdown -o report.md
+
 # Deep scan (multiple pages)
 repro scan https://example.com --max-pages 50 --max-depth 3 --bundle
 
@@ -234,10 +237,18 @@ Output:
 ### `diff` - Compare scan results
 
 ```bash
-repro diff <baseline.json> <comparison.json>
+repro diff <baseline.json> <comparison.json> [options]
+
+Options:
+  -o, --output <path>   Write diff JSON to a file
+  --json                Print diff as JSON to stdout
 ```
 
-Coming soon: Full CLI implementation (currently available via MCP).
+Examples:
+```bash
+repro diff scan-a.json scan-b.json
+repro diff scan-a.json scan-b.json --json -o diff.json
+```
 ## ⚙️ Configuration
 
 Repro-in-a-Box supports configuration files to set default values for all options. This eliminates the need to pass the same flags repeatedly.

@@ -141,6 +141,11 @@ describe('CLI Commands - Diff', () => {
       expect(option).toBeDefined();
       expect(option?.description).toContain('Output file');
     });
+
+    it('should have json option', () => {
+      const option = diffCommand.options.find(o => o.long === '--json');
+      expect(option).toBeDefined();
+    });
   });
 });
 

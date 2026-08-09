@@ -96,12 +96,13 @@
 **Goal:** Beautiful, actionable reports
 
 ### HTML Reports
-- [ ] Single-page HTML report generator
-- [ ] Charts & graphs (Chart.js or D3.js)
-- [ ] Issue severity visualization
+- [x] Single-page HTML report generator
+- [x] Design tokens (OKLCH) + light/dark theme
+- [x] Faceted severity chips, category filter, search
+- [x] Issue severity visualization (stacked bar + category distribution)
 - [ ] Timeline of detections
 - [ ] Screenshot gallery
-- [ ] Filterable issue table
+- [x] Filterable issue table
 - [ ] Shareable report links
 
 ### Dashboard
@@ -113,11 +114,11 @@
 - [ ] Export to PDF/PNG
 
 ### GitHub Integration
-- [ ] GitHub Actions workflow
+- [x] GitHub Actions workflow (composite `action.yml`)
 - [ ] Pull request comments with scan results
-- [ ] Status checks (pass/fail based on thresholds)
+- [ ] Status checks (pass/fail based on thresholds) — `fail-on-issues` input supported
 - [ ] Issue creation for new bugs
-- [ ] Markdown report format
+- [x] Markdown report format
 
 **Tests:** 20+ new tests  
 **Deliverable:** v2.8.0 with visual reporting
@@ -248,29 +249,24 @@
 
 ## 🎯 Immediate Next Steps (This Week)
 
-1. **Test Published Package** ✅
-   ```bash
-   npx repro-in-a-box@2.5.0 scan https://example.com
-   ```
+1. **HTML report polish** ✅
+   - Design tokens, interactive triage, j/k/c shortcuts, copy-issue
 
-2. **Update Documentation** ✅
-   - [x] Update README roadmap
-   - [ ] Create CHANGELOG.md for v2.5.0
-   - [ ] Add CONTRIBUTING.md
-   - [ ] Record demo video/GIF
+2. **CLI gaps** ✅
+   - [x] `repro diff` wired
+   - [x] Markdown report (`--format markdown`)
 
-3. **Community Launch**
-   - [ ] Post to Reddit (r/webdev, r/node, r/javascript)
-   - [ ] Share on Twitter/X
-   - [ ] Submit to Hacker News
-   - [ ] Post on dev.to
-   - [ ] Create Product Hunt page
+3. **GitHub Action** ✅
+   - [x] Composite `action.yml` + docs (`docs/guides/github-action.md`)
+   - [ ] Optional: auto-comment markdown on PRs
 
-4. **Real-World Validation**
-   - [ ] Scan 10+ popular websites
-   - [ ] Document findings
-   - [ ] Create case studies
-   - [ ] Fix any bugs discovered
+4. **Coverage & publish**
+   - [ ] Push coverage toward 90%+
+   - [ ] Publish v2.9.0 (12 detectors: Security + Memory Leak)
+
+5. **Community Launch**
+   - [ ] Demo GIF of HTML report
+   - [ ] Post to Reddit / HN / Product Hunt
 
 ---
 
