@@ -1,26 +1,14 @@
 import { Command } from 'commander';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
-import {
-  DetectorRegistry,
-  JavaScriptErrorsDetector,
-  NetworkErrorsDetector,
-  BrokenAssetsDetector,
-  AccessibilityDetector,
-  WebVitalsDetector,
-  MixedContentDetector,
-  BrokenLinksDetector,
-  ConsoleWarningsDetector,
-  SeoDetector,
-  PerformanceDetector,
-} from '../../detectors/index.js';
+import { createScanRegistry } from '../../plugins/index.js';
 import { Scanner, type ScanConfig } from '../../scanner/index.js';
 import { createBundle, type BundleOptions } from '../../bundler/index.js';
-import { loadConfig, mergeConfigs, DEFAULT_CONFIG, type ReproConfig, type FullReproConfig } from '../../config/index.js';
+import { loadConfig, mergeConfigs, type ReproConfig, type FullReproConfig } from '../../config/index.js';
 import { generateHtmlReport } from '../../reporters/html-reporter.js';
 import { generateMarkdownReport } from '../../reporters/markdown-reporter.js';
 import { logger, createChildLogger } from '../../utils/logger.js';
-import { ValidationError, handleError } from '../../utils/errors.js';
+import { handleError } from '../../utils/errors.js';
 
 export const scanCommand = new Command('scan')
   .description('Scan a website for issues')
@@ -95,44 +83,21 @@ export const scanCommand = new Command('scan')
         bundle: config.bundle.enabled
       });
       
-      // Create registry and register detectors
-      const registry = new DetectorRegistry();
-      
-      // Map of all available detectors
-      const allDetectors = {
-        'javascript-errors': new JavaScriptErrorsDetector(),
-        'network-errors': new NetworkErrorsDetector(),
-        'broken-assets': new BrokenAssetsDetector(),
-        'accessibility': new AccessibilityDetector(),
-        'web-vitals': new WebVitalsDetector(),
-        'mixed-content': new MixedContentDetector(),
-        'broken-links': new BrokenLinksDetector(),
-        'console-warnings': new ConsoleWarningsDetector(),
-        'seo': new SeoDetector(),
-        'performance': new PerformanceDetector(),
-      };
-      
-      // Determine which detectors to enable
-      const enabledDetectorIds = (config.detectors.enabled && config.detectors.enabled.length > 0)
-        ? config.detectors.enabled
-        : Object.keys(allDetectors); // Enable all if none specified
-      
-      // Filter out disabled detectors
-      const finalEnabledIds = enabledDetectorIds.filter(
-        id => !(config.detectors.disabled?.includes(id))
-      );
-      
-      // Register enabled detectors
-      for (const id of finalEnabledIds) {
-        const detector = allDetectors[id as keyof typeof allDetectors];
-        if (detector) {
-          registry.register(detector);
-          scanLogger.debug(`Registered detector: ${id}`);
-        }
-      }
-      
+      const enabled = config.detectors.enabled?.length ? config.detectors.enabled : undefined;
+      const { registry, plugins, hooks } = await createScanRegistry({
+        enabled,
+        disabled: config.detectors.disabled,
+        plugins: {
+          packages: config.plugins.packages,
+          paths: config.plugins.paths,
+          autoDiscover: config.plugins.autoDiscover,
+        },
+      });
+      const finalEnabledIds = registry.list();
+
       scanLogger.info(`📦 Registered ${finalEnabledIds.length} detector(s)`, {
-        detectors: finalEnabledIds
+        detectors: finalEnabledIds,
+        plugins: plugins.map((p) => p.name),
       });
       
       // Create scanner
@@ -174,6 +139,7 @@ export const scanCommand = new Command('scan')
           blockMedia: options.blockMedia === true ? true : undefined,
         },
         progressFormat: (options.progress || 'simple') as 'simple' | 'detailed' | 'minimal',
+        hooks,
       };
       
       // Run scan

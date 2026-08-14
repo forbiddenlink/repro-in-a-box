@@ -7,9 +7,12 @@ settings:
 overrides:
   esbuild: '>=0.28.1'
   flatted: '>=3.4.2'
-  hono: '>=4.12.25'
+  hono: '>=4.12.34'
+  fast-uri: '>=3.1.5'
+  ip-address: '>=10.3.1'
   lodash: '>=4.18.0'
   minimatch: '>=9.0.7'
+  nanoid: '>=3.3.18'
   next: '>=16.2.3'
   path-to-regexp: '>=8.4.0'
   picomatch: '>=4.0.4'
@@ -377,7 +380,7 @@ packages:
     resolution: {integrity: sha512-XovyyCCnBzW+zKu+z/zq8hwNs4KOR5rEMAOxo2f40Q5xoOI37IMm6MIg2COOUtUApo0i6850MTBKH2u4QLGIqg==}
     engines: {node: '>=20'}
     peerDependencies:
-      hono: '>=4.12.25'
+      hono: '>=4.12.34'
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}

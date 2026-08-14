@@ -3,6 +3,7 @@ import inquirer from 'inquirer';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import type { ReproConfig } from '../../config/index.js';
+import { DETECTOR_CHOICES } from '../../detectors/catalog.js';
 
 /**
  * Init command: Interactive configuration wizard
@@ -23,15 +24,7 @@ export const initCommand = new Command('init')
         type: 'checkbox',
         name: 'detectors',
         message: 'Which detectors do you want to enable?',
-        choices: [
-          { name: 'JavaScript Errors', value: 'javascript-errors', checked: true },
-          { name: 'Network Errors', value: 'network-errors', checked: true },
-          { name: 'Broken Assets', value: 'broken-assets', checked: true },
-          { name: 'Accessibility (WCAG 2.1)', value: 'accessibility', checked: true },
-          { name: 'Web Vitals (Core Web Vitals)', value: 'web-vitals', checked: true },
-          { name: 'Mixed Content (HTTP/HTTPS)', value: 'mixed-content', checked: false },
-          { name: 'Broken Links', value: 'broken-links', checked: false },
-        ],
+        choices: DETECTOR_CHOICES,
       },
       {
         type: 'number',
@@ -58,7 +51,7 @@ export const initCommand = new Command('init')
         type: 'list',
         name: 'outputFormat',
         message: 'Preferred output format:',
-        choices: ['json', 'text', 'csv', 'html'],
+        choices: ['json', 'html', 'markdown', 'text', 'csv'],
         default: 'json',
       },
       {

@@ -125,26 +125,21 @@
 
 ---
 
-## 🔌 v2.9: Plugin System (Est. 2 weeks)
+## 🔌 v2.9: Plugin System
 
 **Goal:** Allow users to create custom detectors
 
 ### Plugin API
-- [ ] **Custom Detector Interface**
-  ```typescript
-  export class MyCustomDetector implements Detector {
-    async setup(page: Page) { /* ... */ }
-    async collect(page: Page) { /* ... */ }
-  }
-  ```
-- [ ] **Plugin Discovery:** Load from `node_modules/repro-plugin-*`
-- [ ] **Plugin Registry:** NPM packages with `repro-plugin` keyword
-- [ ] **Plugin Validation:** Schema validation for plugin manifests
-- [ ] **Plugin Lifecycle Hooks:** `beforeScan`, `afterScan`, `onError`
+- [x] **Custom Detector Interface** (`BaseDetector` / `Detector`)
+- [x] **Plugin Discovery:** Load from `node_modules/repro-plugin-*`
+- [x] **Plugin Registry:** NPM packages with `repro-plugin-*` name (plus explicit `plugins.packages` / `plugins.paths`)
+- [x] **Plugin Validation:** Manifest + Detector duck-type checks
+- [x] **Plugin Lifecycle Hooks:** `beforeScan`, `afterScan`, `onError`
+
+See [docs/guides/plugins.md](docs/guides/plugins.md).
 
 ### Community Plugins
 - [ ] Plugin template repository
-- [ ] Plugin development guide
 - [ ] Example plugins (WordPress, Shopify, React)
 - [ ] Plugin marketplace/registry
 
@@ -258,15 +253,19 @@
 
 3. **GitHub Action** ✅
    - [x] Composite `action.yml` + docs (`docs/guides/github-action.md`)
-   - [ ] Optional: auto-comment markdown on PRs
+   - [x] Optional: auto-comment markdown on PRs (`comment-on-pr`)
 
-4. **Coverage & publish**
-   - [ ] Push coverage toward 90%+
-   - [ ] Publish v2.9.0 (12 detectors: Security + Memory Leak)
+4. **Detector wiring & launch hygiene** ✅
+   - [x] Security + Memory Leak actually run on `repro scan` and MCP `scan_site`
+   - [x] CI runs the test suite
+   - [x] Version strings aligned at 2.9.0
+   - [x] Plugin API (`repro-plugin-*` + local paths + lifecycle hooks)
+   - [ ] Publish v2.9.0 to npm (package is public; requires registry login)
 
 5. **Community Launch**
    - [ ] Demo GIF of HTML report
    - [ ] Post to Reddit / HN / Product Hunt
+   - [ ] Cheap demand test: public npm publish + one HN post
 
 ---
 

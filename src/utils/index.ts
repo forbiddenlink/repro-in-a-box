@@ -10,3 +10,6 @@ export type { AppErrorOptions } from './errors.js';
 
 export { ProgressReporter, getProgressReporter, createProgressReporter, resetProgressReporter } from './progress.js';
 export type { ProgressFormat, ProgressEvent, ProgressMetrics } from './progress.js';
+
+export { resolveSafePath, assertHttpUrl } from './safe-path.js';
+export { extractZipSafely } from './zip.js';

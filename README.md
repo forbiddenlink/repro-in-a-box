@@ -1,17 +1,18 @@
-# Repro-in-a-Box v2.7 🎁
+# Repro-in-a-Box v2.9 🎁
 
 **Find bugs. Freeze them. Ship them.**
 
 Autonomous QA agent that finds bugs on your site, captures reproducible evidence (HAR files + screenshots), validates reproducibility, and provides Claude Desktop integration via MCP.
 
-[![Version](https://img.shields.io/badge/version-2.7.0-blue)](https://github.com/forbiddenlink/repro-in-a-box)
-[![Tests](https://img.shields.io/badge/tests-170-green)]()
+[![Version](https://img.shields.io/badge/version-2.9.0-blue)](https://github.com/forbiddenlink/repro-in-a-box)
+[![Tests](https://img.shields.io/badge/tests-247+-green)]()
 [![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ## ✨ Features
 
-- **7 Built-in Detectors**: JavaScript errors, network failures, broken assets, accessibility (WCAG 2.1), web vitals, mixed content, broken links
+- **12 Built-in Detectors**: JavaScript errors, network failures, broken assets, accessibility (WCAG 2.1), web vitals, mixed content, broken links, console warnings, SEO, performance, security headers, memory leaks
+- **Plugin API**: Load `repro-plugin-*` packages or local modules with custom detectors and scan hooks
 - **Production-Grade Infrastructure** ✨ NEW v2.7:
   - Structured logging with multiple output levels
   - Comprehensive error handling with exit codes

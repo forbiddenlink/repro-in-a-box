@@ -41,6 +41,7 @@ jobs:
 | `max-depth` | `2` | Crawl depth |
 | `format` | `html` | `html` or `markdown` |
 | `fail-on-issues` | `false` | Fail the job when issues > 0 |
+| `comment-on-pr` | `false` | Post the markdown report as a PR comment (`format` must be `markdown`) |
 | `output-dir` | `repro-results` | Artifact directory |
 
 ## Outputs
@@ -52,3 +53,12 @@ jobs:
 | `issue-count` | Total issues found |
 
 JSON is always written alongside the human report so PR bots and later steps can parse results.
+
+PR comments need `pull-requests: write` on the caller workflow:
+
+```yaml
+permissions:
+  contents: read
+  pull-requests: write
+```
+

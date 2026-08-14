@@ -165,7 +165,7 @@ export default MyDetector;
 ```
 
 ### Detectors
-All detectors must implement the `Detector` interface:
+All detectors must extend `BaseDetector` (or implement `Detector`). See [docs/guides/plugins.md](docs/guides/plugins.md) to ship a `repro-plugin-*` package.
 
 ```typescript
 export interface Detector {

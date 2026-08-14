@@ -223,6 +223,16 @@ describe('Config Loader', () => {
       expect(result.detectors.disabled).toEqual(['mixed-content']);
     });
 
+    it('should accept canonical ids including security and memory-leak', () => {
+      const result = validateConfig({
+        detectors: {
+          enabled: ['js-errors', 'security', 'memory-leak'],
+        }
+      });
+
+      expect(result.detectors.enabled).toEqual(['js-errors', 'security', 'memory-leak']);
+    });
+
     it('should validate browser configuration', () => {
       const config = {
         browser: {
