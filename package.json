@@ -53,7 +53,7 @@
     "inquirer": "^14.0.2",
     "playwright": "^1.62.1",
     "tsx": "^4.23.11",
-    "web-vitals": "^5.3.0",
+    "web-vitals": "^6.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
