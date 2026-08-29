@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.7.0...v2.8.0) (2026-08-29)
+
+
+### Features
+
+* plugin API and 12 live detectors ([#46](https://github.com/forbiddenlink/repro-in-a-box/issues/46)) ([115893f](https://github.com/forbiddenlink/repro-in-a-box/commit/115893f5a91055ffe49477d43c2304360f0ee1db))
+
 ## [2.7.0](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.6.0...v2.7.0) (2026-08-09)
 
 
