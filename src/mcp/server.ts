@@ -3,26 +3,18 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  Tool
+  type Tool
 } from '@modelcontextprotocol/sdk/types.js';
+import { z } from 'zod';
 import { Scanner, type ScanConfig, type ScanResults } from '../scanner/index.js';
-import { DetectorRegistry, JavaScriptErrorsDetector, NetworkErrorsDetector, BrokenAssetsDetector, AccessibilityDetector, WebVitalsDetector, MixedContentDetector, BrokenLinksDetector, ConsoleWarningsDetector, SeoDetector, PerformanceDetector } from '../detectors/index.js';
+import { DETECTOR_IDS } from '../detectors/index.js';
+import { createScanRegistry } from '../plugins/index.js';
 import { validateReproducibility } from '../determinism/replayer.js';
 import { diffScans, formatDiff } from '../determinism/diff.js';
-import {
-  SessionRecorder,
-  SessionReplayer,
-  reproduceBug,
-  type RecordedSession,
-  type ReplayResult,
-  type ReproductionResult,
-} from './playwright-integration.js';
+import { VERSION } from '../cli/version.js';
+import { assertHttpUrl, resolveSafePath } from '../utils/safe-path.js';
 import * as fs from 'fs/promises';
-import * as path from 'path';
 
-/**
- * Constants for MCP server configuration
- */
 const MCP_DEFAULTS = {
   DEFAULT_MAX_PAGES: 10,
   DEFAULT_MAX_DEPTH: 2,
@@ -33,63 +25,122 @@ const MCP_DEFAULTS = {
   FAIR_SCORE: 70
 };
 
-/**
- * Type-safe arguments for scan_site tool
- */
-interface ScanSiteArgs {
-  url: string;
-  maxPages?: number;
-  maxDepth?: number;
-  detectors?: string[];
-  bundle?: boolean;
-  screenshots?: boolean;
-}
+const ScanSiteArgsSchema = z.object({
+  url: z.string().min(1),
+  maxPages: z.number().int().min(1).max(1000).optional(),
+  maxDepth: z.number().int().min(1).max(10).optional(),
+  detectors: z.array(z.string()).optional(),
+  bundle: z.boolean().optional(),
+  screenshots: z.boolean().optional(),
+});
 
-/**
- * Type-safe arguments for validate_reproduction tool
- */
-interface ValidateReproductionArgs {
-  bundlePath: string;
-  runs?: number;
-  threshold?: number;
-}
+const ValidateReproductionArgsSchema = z.object({
+  bundlePath: z.string().min(1),
+  runs: z.number().int().min(1).max(20).optional(),
+  threshold: z.number().min(0).max(100).optional(),
+});
 
-/**
- * Type-safe arguments for diff_scans tool
- */
-interface DiffScansArgs {
-  baselinePath: string;
-  comparisonPath: string;
-}
+const DiffScansArgsSchema = z.object({
+  baselinePath: z.string().min(1),
+  comparisonPath: z.string().min(1),
+});
 
-/**
- * Type-safe arguments for record_session tool
- */
-interface RecordSessionArgs {
-  url: string;
-  outputDir?: string;
-  screenshots?: boolean;
-  recordHar?: boolean;
-}
+type ScanSiteArgs = z.infer<typeof ScanSiteArgsSchema>;
+type ValidateReproductionArgs = z.infer<typeof ValidateReproductionArgsSchema>;
+type DiffScansArgs = z.infer<typeof DiffScansArgsSchema>;
 
-/**
- * Type-safe arguments for replay_session tool
- */
-interface ReplaySessionArgs {
-  sessionPath: string;
-  selfHealing?: boolean;
-  slowMo?: number;
-  headless?: boolean;
-}
+const DETECTOR_LIST = DETECTOR_IDS.join(', ');
 
-/**
- * Type-safe arguments for reproduce_bug tool
- */
-interface ReproduceBugArgs {
-  recordingPath: string;
-  attempts?: number;
-  selfHealing?: boolean;
-  outputDir?: string;
+export const MCP_TOOLS: Tool[] = [
+  {
+    name: 'scan_site',
+    description: 'Scan a website for bugs and generate a reproduction bundle. Only http(s) URLs are accepted.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        url: {
+          type: 'string',
+          description: 'URL to scan (e.g., https://example.com)'
+        },
+        maxPages: {
+          type: 'number',
+          description: 'Maximum number of pages to scan',
+          default: MCP_DEFAULTS.DEFAULT_MAX_PAGES
+        },
+        maxDepth: {
+          type: 'number',
+          description: 'Maximum crawl depth',
+          default: MCP_DEFAULTS.DEFAULT_MAX_DEPTH
+        },
+        detectors: {
+          type: 'array',
+          items: { type: 'string' },
+          description: `Detector IDs to enable, or ["all"]. Valid: ${DETECTOR_LIST}. Alias: javascript-errors → js-errors.`,
+          default: ['all']
+        },
+        bundle: {
+          type: 'boolean',
+          description: 'Create a reproducible bundle with HAR file and screenshots',
+          default: true
+        },
+        screenshots: {
+          type: 'boolean',
+          description: 'Capture screenshots when issues are detected',
+          default: true
+        }
+      },
+      required: ['url']
+    }
+  },
+  {
+    name: 'validate_reproduction',
+    description: 'Validate reproducibility of a scan bundle by replaying HAR files. bundlePath must stay under the current working directory.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        bundlePath: {
+          type: 'string',
+          description: 'Path to the ZIP bundle file (relative to cwd)'
+        },
+        runs: {
+          type: 'number',
+          description: 'Number of replay runs to perform',
+          default: MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_RUNS
+        },
+        threshold: {
+          type: 'number',
+          description: 'Minimum reproducibility score (0-100)',
+          default: MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_THRESHOLD
+        }
+      },
+      required: ['bundlePath']
+    }
+  },
+  {
+    name: 'diff_scans',
+    description: 'Compare two scan results and show differences. Paths must stay under the current working directory.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        baselinePath: {
+          type: 'string',
+          description: 'Path to the baseline scan results JSON (relative to cwd)'
+        },
+        comparisonPath: {
+          type: 'string',
+          description: 'Path to the comparison scan results JSON (relative to cwd)'
+        }
+      },
+      required: ['baselinePath', 'comparisonPath']
+    }
+  }
+];
+
+function toolError(message: string) {
+  return {
+    content: [{ type: 'text' as const, text: message }],
+    isError: true
+  };
 }
 
 export class ReproMcpServer {
@@ -99,7 +150,7 @@ export class ReproMcpServer {
     this.server = new Server(
       {
         name: 'repro-in-a-box',
-        version: '2.0.0'
+        version: VERSION
       },
       {
         capabilities: {
@@ -111,108 +162,25 @@ export class ReproMcpServer {
     this.setupToolHandlers();
   }
 
+  getTools(): Tool[] {
+    return MCP_TOOLS;
+  }
+
   private setupToolHandlers(): void {
-    // List available tools
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: [
-          {
-            name: 'scan_site',
-            description: 'Scan a website for bugs and generate a reproduction bundle',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                url: { 
-                  type: 'string', 
-                  description: 'URL to scan (e.g., https://example.com)' 
-                },
-                maxPages: { 
-                  type: 'number', 
-                  description: 'Maximum number of pages to scan',
-                  default: MCP_DEFAULTS.DEFAULT_MAX_PAGES 
-                },
-                maxDepth: {
-                  type: 'number',
-                  description: 'Maximum crawl depth',
-                  default: MCP_DEFAULTS.DEFAULT_MAX_DEPTH
-                },
-                detectors: { 
-                  type: 'array', 
-                  items: { type: 'string' },
-                  description: 'Detector IDs to enable (js-errors, network-errors, broken-assets, accessibility, web-vitals, mixed-content, broken-links)',
-                  default: ['all']
-                },
-                bundle: {
-                  type: 'boolean',
-                  description: 'Create a reproducible bundle with HAR file and screenshots',
-                  default: true
-                },
-                screenshots: {
-                  type: 'boolean',
-                  description: 'Capture screenshots when issues are detected',
-                  default: true
-                }
-              },
-              required: ['url']
-            }
-          },
-          {
-            name: 'validate_reproduction',
-            description: 'Validate reproducibility of a scan bundle by replaying HAR files',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                bundlePath: { 
-                  type: 'string',
-                  description: 'Path to the ZIP bundle file'
-                },
-                runs: {
-                  type: 'number',
-                  description: 'Number of replay runs to perform',
-                  default: MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_RUNS
-                },
-                threshold: {
-                  type: 'number',
-                  description: 'Minimum reproducibility score (0-100)',
-                  default: MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_THRESHOLD
-                }
-              },
-              required: ['bundlePath']
-            }
-          },
-          {
-            name: 'diff_scans',
-            description: 'Compare two scan results and show differences',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                baselinePath: { 
-                  type: 'string',
-                  description: 'Path to the baseline scan results JSON' 
-                },
-                comparisonPath: { 
-                  type: 'string',
-                  description: 'Path to the comparison scan results JSON'
-                }
-              },
-              required: ['baselinePath', 'comparisonPath']
-            }
-          }
-        ] as Tool[]
-      };
+      return { tools: MCP_TOOLS };
     });
 
-    // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
       switch (name) {
         case 'scan_site':
-          return this.handleScanSite(args as unknown as ScanSiteArgs);
+          return this.handleScanSite(ScanSiteArgsSchema.parse(args ?? {}));
         case 'validate_reproduction':
-          return this.handleValidate(args as unknown as ValidateReproductionArgs);
+          return this.handleValidate(ValidateReproductionArgsSchema.parse(args ?? {}));
         case 'diff_scans':
-          return this.handleDiff(args as unknown as DiffScansArgs);
+          return this.handleDiff(DiffScansArgsSchema.parse(args ?? {}));
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
@@ -221,42 +189,30 @@ export class ReproMcpServer {
 
   private async handleScanSite(args: ScanSiteArgs) {
     try {
-      // Create detector registry
-      const registry = new DetectorRegistry();
-      
-      // Register all detectors
-      registry.register(new JavaScriptErrorsDetector());
-      registry.register(new NetworkErrorsDetector());
-      registry.register(new BrokenAssetsDetector());
-      registry.register(new AccessibilityDetector());
-      registry.register(new WebVitalsDetector());
-      registry.register(new MixedContentDetector());
-      registry.register(new BrokenLinksDetector());
-      registry.register(new ConsoleWarningsDetector());
-      registry.register(new SeoDetector());
-      registry.register(new PerformanceDetector());
+      assertHttpUrl(args.url);
 
-      // Create scanner
+      const { registry, hooks } = await createScanRegistry({
+        enabled: args.detectors,
+      });
+
       const scanner = new Scanner(registry);
-      
-      // Configure scan
+
       const config: ScanConfig = {
         url: args.url,
         crawler: {
-          maxDepth: args.maxDepth || MCP_DEFAULTS.DEFAULT_MAX_DEPTH,
-          maxPages: args.maxPages || MCP_DEFAULTS.DEFAULT_MAX_PAGES,
+          maxDepth: args.maxDepth ?? MCP_DEFAULTS.DEFAULT_MAX_DEPTH,
+          maxPages: args.maxPages ?? MCP_DEFAULTS.DEFAULT_MAX_PAGES,
           rateLimitMs: 1000,
         },
         headless: true,
         recordHar: args.bundle !== false,
         screenshots: args.screenshots !== false,
         outputDir: process.cwd(),
+        hooks,
       };
-      
-      // Run scan
+
       const results = await scanner.scan(config);
-      
-      // Create bundle if requested
+
       let bundlePath: string | undefined;
       if (args.bundle !== false) {
         const { createBundle } = await import('../bundler/index.js');
@@ -267,13 +223,13 @@ export class ReproMcpServer {
         });
         bundlePath = bundleResult.bundlePath;
       }
-      
-      // Format response
+
       const summary = `Scanned ${results.summary.pagesScanned} pages and found ${results.summary.totalIssues} issues.\n\n` +
+        `Detectors: ${registry.list().join(', ')}\n\n` +
         `By Category:\n${Object.entries(results.summary.byCategory).map(([cat, count]) => `  - ${cat}: ${count}`).join('\n')}\n\n` +
         `By Severity:\n${Object.entries(results.summary.bySeverity).map(([sev, count]) => `  - ${sev}: ${count}`).join('\n')}` +
         (bundlePath ? `\n\nBundle created: ${bundlePath}` : '');
-      
+
       return {
         content: [
           {
@@ -284,39 +240,35 @@ export class ReproMcpServer {
         isError: false
       };
     } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error scanning site: ${error instanceof Error ? error.message : String(error)}`
-          }
-        ],
-        isError: true
-      };
+      return toolError(`Error scanning site: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   private async handleValidate(args: ValidateReproductionArgs) {
     try {
+      const bundlePath = resolveSafePath(args.bundlePath);
+
       const result = await validateReproducibility({
-        bundlePath: args.bundlePath,
-        runs: args.runs || MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_RUNS,
+        bundlePath,
+        runs: args.runs ?? MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_RUNS,
       });
-      
-      const threshold = args.threshold || MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_THRESHOLD;
+
+      const threshold = args.threshold ?? MCP_DEFAULTS.DEFAULT_REPRODUCIBILITY_THRESHOLD;
       const passed = result.reproducibilityScore >= threshold;
-      
+
       const summary = `Validation Results:\n\n` +
         `Reproducibility Score: ${result.reproducibilityScore.toFixed(1)}%\n` +
         `Threshold: ${threshold}%\n` +
         `Status: ${passed ? '✅ PASSED' : '❌ FAILED'}\n\n` +
         `Original Scan: ${result.originalScan.summary.totalIssues} issues\n` +
         `Replay Runs: ${result.summary.totalRuns} (${result.summary.successfulRuns} successful)\n` +
-        `Average Issues Found: ${result.summary.averageIssuesFound.toFixed(1)}\n\n` +
-        `Grade: ${result.reproducibilityScore >= MCP_DEFAULTS.EXCELLENT_SCORE ? '🥇 Excellent' : 
-                  result.reproducibilityScore >= MCP_DEFAULTS.GOOD_SCORE ? '🥈 Good' : 
+        `Average Issues Found: ${result.summary.averageIssuesFound.toFixed(1)}\n` +
+        `Consistent Issues: ${result.summary.consistentIssues}\n` +
+        `Inconsistent Issues: ${result.summary.inconsistentIssues}\n\n` +
+        `Grade: ${result.reproducibilityScore >= MCP_DEFAULTS.EXCELLENT_SCORE ? '🥇 Excellent' :
+                  result.reproducibilityScore >= MCP_DEFAULTS.GOOD_SCORE ? '🥈 Good' :
                   result.reproducibilityScore >= MCP_DEFAULTS.FAIR_SCORE ? '🥉 Fair' : '❌ Poor'}`;
-      
+
       return {
         content: [
           {
@@ -327,28 +279,21 @@ export class ReproMcpServer {
         isError: !passed
       };
     } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error validating reproduction: ${error instanceof Error ? error.message : String(error)}`
-          }
-        ],
-        isError: true
-      };
+      return toolError(`Error validating reproduction: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   private async handleDiff(args: DiffScansArgs) {
     try {
-      // Load scan results
-      const baseline = JSON.parse(await fs.readFile(args.baselinePath, 'utf-8')) as ScanResults;
-      const comparison = JSON.parse(await fs.readFile(args.comparisonPath, 'utf-8')) as ScanResults;
+      const baselinePath = resolveSafePath(args.baselinePath);
+      const comparisonPath = resolveSafePath(args.comparisonPath);
 
-      // Compute diff
+      const baseline = JSON.parse(await fs.readFile(baselinePath, 'utf-8')) as ScanResults;
+      const comparison = JSON.parse(await fs.readFile(comparisonPath, 'utf-8')) as ScanResults;
+
       const diff = diffScans(baseline, comparison);
       const formatted = formatDiff(diff);
-      
+
       return {
         content: [
           {
@@ -359,15 +304,7 @@ export class ReproMcpServer {
         isError: false
       };
     } catch (error) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error comparing scans: ${error instanceof Error ? error.message : String(error)}`
-          }
-        ],
-        isError: true
-      };
+      return toolError(`Error comparing scans: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -375,7 +312,6 @@ export class ReproMcpServer {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
 
-    // Server runs until stdin closes
     console.error('MCP server started on stdio');
   }
 }

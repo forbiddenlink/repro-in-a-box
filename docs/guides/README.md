@@ -16,7 +16,8 @@ Welcome to the Repro-in-a-Box feature documentation. Choose a topic below:
 - [Progress Reporting](./progress.md) - Real-time feedback during scanning
 
 ### Advanced
-- [Integration Guide](./integration.md) - Use as library or MCP server
+- [GitHub Action](./github-action.md) - Scan in CI and upload reports
+- [Plugin API](./plugins.md) - Custom detectors and scan lifecycle hooks
 - [Performance Tuning](./performance.md) - Optimize for your use case
 - [Troubleshooting](./troubleshooting.md) - Solve common issues
 

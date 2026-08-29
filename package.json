@@ -1,16 +1,36 @@
 {
   "name": "repro-in-a-box",
   "version": "2.7.0",
-  "description": "Production-grade automated bug detection with 10 detectors and 215+ tests. Find bugs with Playwright, configure detectors, record HAR files, validate reproducibility, and integrate with Claude Desktop via MCP.",
+  "description": "Production-grade automated bug detection with 12 detectors and a plugin API. Find bugs with Playwright, record HAR files, validate reproducibility, and integrate with Claude Desktop via MCP.",
   "type": "module",
-  "main": "dist/cli/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "repro": "dist/cli/index.js"
+    "repro": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "pnpm run build",
     "dev": "tsx src/cli/index.ts",
     "test": "vitest",
+    "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "mcp": "node dist/mcp/index.js",
     "lint": "eslint src/**/*.ts tests/**/*.ts",
@@ -68,14 +88,20 @@
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
-  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "private": false,
   "pnpm": {
     "overrides": {
       "esbuild": ">=0.28.1",
       "flatted": ">=3.4.2",
-      "hono": ">=4.12.25",
+      "hono": ">=4.12.34",
+      "fast-uri": ">=3.1.5",
+      "ip-address": ">=10.3.1",
       "lodash": ">=4.18.0",
       "minimatch": ">=9.0.7",
+      "nanoid": ">=3.3.18",
       "next": ">=16.2.3",
       "path-to-regexp": ">=8.4.0",
       "picomatch": ">=4.0.4",

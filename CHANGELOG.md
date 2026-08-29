@@ -38,6 +38,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-08-14
+
+### Added
+- **Detector catalog** — single registration path for CLI, MCP, and HAR replay (12 detectors actually run on scan, not just on replay)
+- **Plugin API** — load `repro-plugin-*` packages or local modules with custom detectors and `beforeScan` / `afterScan` / `onError` hooks
+- Public library entry (`import { BaseDetector } from 'repro-in-a-box'`) for plugin authors
+- **MCP hardening** — http(s)-only scan URLs, cwd path sandbox for file tools, Zod tool-arg validation
+- **Zip-slip guard** on bundle extract
+- **CI test job** — Playwright Chromium + `vitest run` on every PR
+- `engines.node` `>=20` and `.nvmrc`
+
+### Fixed
+- Security and Memory Leak detectors were implemented but never registered by `repro scan` or the MCP `scan_site` tool
+- Detector id drift: config/docs used `javascript-errors` while the class id is `js-errors` (alias kept)
+- MCP `detectors` argument was ignored; `maxPages: 0` collapsed to the default via `||`
+- Replayer `consistentIssues` / `inconsistentIssues` were hardcoded to 0
+- Transitive CVEs in `@modelcontextprotocol/sdk` (fast-uri, ip-address, hono) via pnpm overrides
+
 ### Added
 - **Security Detector** - New detector for security issues:
   - HTTPS enforcement validation

@@ -22,7 +22,8 @@ export enum IssueCategory {
   SECURITY = 'security',
   LINKS = 'links',
   CONSOLE = 'console',
-  SEO = 'seo'
+  SEO = 'seo',
+  CUSTOM = 'custom'
 }
 
 /**

@@ -17,3 +17,18 @@ export { SeoDetector } from './seo.js';
 export { PerformanceDetector } from './performance.js';
 export { SecurityDetector } from './security.js';
 export { MemoryLeakDetector } from './memory-leak.js';
+
+// Catalog: single source of truth for ids, aliases, and registration
+export {
+  DETECTOR_IDS,
+  DETECTOR_ALIASES,
+  DETECTOR_CHOICES,
+  createAllDetectors,
+  createDefaultRegistry,
+  registerDetectors,
+  resolveDetectorIds,
+  canonicalDetectorId,
+  selectBuiltinIds,
+  type DetectorId,
+  type RegisterDetectorsOptions,
+} from './catalog.js';

@@ -9,13 +9,19 @@ export const ConfigSchema = z.object({
   // Detector configuration
   detectors: z.object({
     enabled: z.array(z.enum([
-      'javascript-errors',
+      'js-errors',
+      'javascript-errors', // alias for js-errors
       'network-errors',
       'broken-assets',
       'accessibility',
       'web-vitals',
       'mixed-content',
-      'broken-links'
+      'broken-links',
+      'console-warnings',
+      'seo',
+      'performance',
+      'security',
+      'memory-leak',
     ])).optional().describe('List of detectors to enable (default: all)'),
     disabled: z.array(z.string()).optional().describe('List of detectors to disable'),
   }).optional(),
@@ -79,6 +85,15 @@ export const ConfigSchema = z.object({
     compression: z.enum(['none', 'fast', 'best']).optional()
       .describe('ZIP compression level (default: fast)'),
   }).optional(),
+
+  plugins: z.object({
+    packages: z.array(z.string().min(1)).optional()
+      .describe('Installed npm packages that export a Repro plugin'),
+    paths: z.array(z.string().min(1)).optional()
+      .describe('Local plugin module paths (must stay under the project directory)'),
+    autoDiscover: z.boolean().optional()
+      .describe('Load repro-plugin-* packages from node_modules (default: true)'),
+  }).optional(),
 }).strict();
 
 export type ReproConfig = z.infer<typeof ConfigSchema>;
@@ -94,6 +109,7 @@ export type FullReproConfig = {
   output: NonNullable<ReproConfig['output']>;
   thresholds: NonNullable<ReproConfig['thresholds']>;
   bundle: NonNullable<ReproConfig['bundle']>;
+  plugins: NonNullable<ReproConfig['plugins']>;
 };
 
 /**
@@ -133,6 +149,11 @@ export const DEFAULT_CONFIG: FullReproConfig = {
     includeHar: true,
     compression: 'fast',
   },
+  plugins: {
+    packages: [],
+    paths: [],
+    autoDiscover: true,
+  },
 };
 
 /**
@@ -160,6 +181,9 @@ export function mergeConfigs(...configs: Partial<ReproConfig>[]): FullReproConfi
     }
     if (config.bundle) {
       merged.bundle = { ...merged.bundle, ...config.bundle };
+    }
+    if (config.plugins) {
+      merged.plugins = { ...merged.plugins, ...config.plugins };
     }
   }
   

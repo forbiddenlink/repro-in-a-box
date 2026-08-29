@@ -26,6 +26,10 @@ inputs:
     description: 'Fail the job when any issues are found'
     required: false
     default: 'false'
+  comment-on-pr:
+    description: 'Post the markdown report as a pull request comment (use format: markdown)'
+    required: false
+    default: 'false'
   output-dir:
     description: 'Directory for report artifacts'
     required: false
@@ -122,6 +126,29 @@ runs:
           echo "Failing because issues were found ($ISSUE_COUNT)" >&2
           exit 1
         fi
+
+    - name: Comment markdown report on PR
+      if: ${{ inputs.comment-on-pr == 'true' && github.event_name == 'pull_request' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPORT_PATH: ${{ steps.scan.outputs.report-path }}
+        ISSUE_COUNT: ${{ steps.scan.outputs.issue-count }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        set -euo pipefail
+        if [[ ! "$REPORT_PATH" =~ \.md$ ]]; then
+          echo "comment-on-pr requires format: markdown (got $REPORT_PATH)" >&2
+          exit 1
+        fi
+        {
+          echo "## Repro-in-a-Box scan"
+          echo
+          echo "Issues found: $ISSUE_COUNT"
+          echo
+          cat "$REPORT_PATH"
+        } > /tmp/repro-pr-comment.md
+        gh pr comment "$PR_NUMBER" --body-file /tmp/repro-pr-comment.md
 
     - name: Upload report artifacts
       uses: actions/upload-artifact@v7

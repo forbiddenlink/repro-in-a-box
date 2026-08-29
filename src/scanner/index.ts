@@ -57,6 +57,12 @@ export interface ScanConfig {
   assetBlocking?: AssetBlockingConfig;
   /** Progress reporting format (simple, detailed, minimal) */
   progressFormat?: ProgressFormat;
+  /** Optional plugin lifecycle hooks */
+  hooks?: {
+    beforeScan?: (ctx: { url: string; registry: DetectorRegistry }) => Promise<void> | void;
+    afterScan?: (ctx: { url: string; registry: DetectorRegistry; results: ScanResults }) => Promise<void> | void;
+    onError?: (error: Error, ctx: { url: string; registry: DetectorRegistry }) => Promise<void> | void;
+  };
 }
 
 /**
@@ -406,6 +412,9 @@ export class Scanner {
     });
     
     try {
+      const hookCtx = { url: config.url, registry: this.registry };
+      await config.hooks?.beforeScan?.(hookCtx);
+
       // Initialize browser with config
       await this.init(config);
       
@@ -465,7 +474,7 @@ export class Scanner {
       // Calculate summary
       const summary = this.calculateSummary(pages, duration);
       
-      return {
+      const results: ScanResults = {
         timestamp: new Date(startTime).toISOString(),
         url: config.url,
         config,
@@ -473,6 +482,17 @@ export class Scanner {
         summary,
         harPath: config.harPath,
       };
+
+      await config.hooks?.afterScan?.({ ...hookCtx, results });
+      return results;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      try {
+        await config.hooks?.onError?.(err, { url: config.url, registry: this.registry });
+      } catch {
+        // plugin onError must not mask the original failure
+      }
+      throw err;
     } finally {
       await this.cleanup();
     }

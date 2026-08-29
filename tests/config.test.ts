@@ -43,6 +43,7 @@ describe('Config System', () => {
       expect(DEFAULT_CONFIG).toHaveProperty('output');
       expect(DEFAULT_CONFIG).toHaveProperty('thresholds');
       expect(DEFAULT_CONFIG).toHaveProperty('bundle');
+      expect(DEFAULT_CONFIG).toHaveProperty('plugins');
     });
 
     it('should have sensible defaults', () => {

@@ -124,7 +124,7 @@ export function validateConfig(config: unknown): ReproConfig {
 export function generateExampleConfig(): string {
   const example = {
     detectors: {
-      enabled: ['js-errors', 'accessibility', 'web-vitals'],
+      enabled: ['js-errors', 'accessibility', 'web-vitals', 'security'],
       disabled: ['mixed-content'],
     },
     crawler: {
@@ -149,6 +149,9 @@ export function generateExampleConfig(): string {
       enabled: true,
       includeScreenshots: true,
       compression: 'best',
+    },
+    plugins: {
+      autoDiscover: true,
     },
   };
   

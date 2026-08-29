@@ -116,7 +116,10 @@ describe('ProgressReporter', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const metrics = reporter.getMetrics();
-      expect(metrics.timeElapsedMs).toBeGreaterThanOrEqual(100);
+      // getElapsedMs() is a Date.now() delta, so it truncates to whole ms and the
+      // constructor may start partway through one. A 100ms sleep can therefore
+      // measure 99. Allow a small tolerance instead of asserting timer precision.
+      expect(metrics.timeElapsedMs).toBeGreaterThanOrEqual(95);
     });
 
     it('should increase elapsed time over time', async () => {

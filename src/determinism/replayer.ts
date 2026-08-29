@@ -2,21 +2,10 @@ import { chromium, type Browser, type BrowserContext, type Page } from '@playwri
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Scanner, type ScanResults } from '../scanner/index.js';
-import {
-  DetectorRegistry,
-  JavaScriptErrorsDetector,
-  NetworkErrorsDetector,
-  BrokenAssetsDetector,
-  AccessibilityDetector,
-  WebVitalsDetector,
-  MixedContentDetector,
-  BrokenLinksDetector,
-  ConsoleWarningsDetector,
-  SeoDetector,
-  PerformanceDetector,
-  SecurityDetector,
-  MemoryLeakDetector,
-} from '../detectors/index.js';
+import { DetectorRegistry } from '../detectors/index.js';
+import { createScanRegistry } from '../plugins/index.js';
+import { analyzeConsistency } from './diff.js';
+import { extractZipSafely } from '../utils/zip.js';
 
 export interface ReplayOptions {
   harPath: string;
@@ -230,23 +219,7 @@ export async function validateReproducibility(options: ValidationOptions): Promi
     throw new Error(`HAR file not found: ${harPath}`);
   }
   
-  // Create scanner with same detectors
-  const registry = new DetectorRegistry();
-  
-  // Register all available detectors
-  registry.register(new JavaScriptErrorsDetector());
-  registry.register(new NetworkErrorsDetector());
-  registry.register(new BrokenAssetsDetector());
-  registry.register(new AccessibilityDetector());
-  registry.register(new WebVitalsDetector());
-  registry.register(new MixedContentDetector());
-  registry.register(new BrokenLinksDetector());
-  registry.register(new ConsoleWarningsDetector());
-  registry.register(new SeoDetector());
-  registry.register(new PerformanceDetector());
-  registry.register(new SecurityDetector());
-  registry.register(new MemoryLeakDetector());
-
+  const { registry, hooks } = await createScanRegistry();
   const scanner = new Scanner(registry);
   
   // Run multiple replays
@@ -274,6 +247,10 @@ export async function validateReproducibility(options: ValidationOptions): Promi
   
   // Calculate reproducibility score
   const score = calculateReproducibilityScore(originalScan, replayRuns);
+  const consistency = analyzeConsistency(
+    originalScan,
+    replayRuns.filter((r) => r.success).map((r) => r.results)
+  );
   
   return {
     originalScan,
@@ -283,8 +260,8 @@ export async function validateReproducibility(options: ValidationOptions): Promi
       totalRuns: runs,
       successfulRuns: replayRuns.filter(r => r.success).length,
       averageIssuesFound: replayRuns.reduce((sum, r) => sum + r.results.summary.totalIssues, 0) / runs,
-      consistentIssues: 0, // TODO: Calculate
-      inconsistentIssues: 0, // TODO: Calculate
+      consistentIssues: consistency.summary.totalAlwaysPresent,
+      inconsistentIssues: consistency.summary.totalInconsistent,
     },
   };
 }
@@ -328,7 +305,7 @@ async function extractBundle(bundlePath: string, outputDir?: string): Promise<st
   const extractDir = outputDir || path.join(path.dirname(bundlePath), 'extracted');
   
   await fs.mkdir(extractDir, { recursive: true });
-  zip.extractAllTo(extractDir, true);
+  extractZipSafely(zip, extractDir);
   
   return extractDir;
 }
