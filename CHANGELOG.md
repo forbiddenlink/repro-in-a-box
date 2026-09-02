@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.1](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.0...v2.8.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **ci:** let pnpm/action-setup read the version from packageManager ([db75adc](https://github.com/forbiddenlink/repro-in-a-box/commit/db75adca302febabfbd983443815bd431ecc35be))
+
 ## [2.8.0](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.7.0...v2.8.0) (2026-08-29)
 
 
