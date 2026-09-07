@@ -12,6 +12,23 @@ import {
 } from '../src/detectors/index.js';
 import { Scanner } from '../src/scanner/index.js';
 
+// Collect before sampling the heap. A single gc() pass frees objects but can
+// leave those with finalizers queued, so yield to the macrotask queue and
+// collect again. package.json runs the suite with NODE_OPTIONS=--expose-gc; if that is
+// ever dropped, fail loudly here rather than silently asserting on garbage.
+async function settleHeap(): Promise<void> {
+  if (typeof global.gc !== 'function') {
+    throw new Error(
+      'Memory benchmarks need --expose-gc. Run via pnpm test / test:run, which set ' +
+        'NODE_OPTIONS=--expose-gc; ' +
+        'without it heapUsed deltas measure uncollected garbage, not leaks.'
+    );
+  }
+  global.gc();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  global.gc();
+}
+
 describe('Performance Benchmarks', () => {
   let browser: Browser;
 
@@ -141,10 +158,7 @@ describe('Performance Benchmarks', () => {
         await page.close();
       }
       
-      // Force garbage collection if available
-      if (global.gc) {
-        global.gc();
-      }
+      await settleHeap();
       
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = finalMemory - initialMemory;
