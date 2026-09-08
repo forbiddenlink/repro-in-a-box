@@ -306,7 +306,6 @@ export class Scanner {
   private async scanPage(page: Page, crawledPage: CrawledPage): Promise<PageScanResult> {
     const detectors = this.registry.getEnabled();
     const detectorResults: DetectorResult[] = [];
-    let error: string | undefined;
     let screenshotPath: string | undefined;
     
     // Report page scan start
@@ -379,22 +378,9 @@ export class Scanner {
         screenshotPath,
       };
     } catch (err) {
-      error = err instanceof Error ? err.message : String(err);
-      
       // Report page scan completion even on error
       this.progress?.completePage(crawledPage.url);
-      
-      return {
-        url: crawledPage.url,
-        depth: crawledPage.depth,
-        detectorResults,
-        summary: {
-          totalIssues: 0,
-          byCategory: {},
-          bySeverity: {},
-        },
-        error,
-      };
+      throw err;
     }
   }
   
@@ -444,25 +430,27 @@ export class Scanner {
       const estimatedPages = config.crawler?.maxPages || 50;
       this.progress.setEstimatedPages(estimatedPages);
       
-      // Crawl and scan pages
-      for await (const crawledPage of crawler.crawl(this.page, config.url)) {
-        console.log(`📄 Scanning: ${crawledPage.url}`);
-        
-        // Scan the page
-        const result = await this.scanPage(this.page, crawledPage);
-        pages.push(result);
-        
-        // Log issues found
-        if (result.summary.totalIssues > 0) {
-          console.log(`  ⚠️  Found ${result.summary.totalIssues} issue(s)`);
-        } else {
-          console.log(`  ✅ No issues found`);
+      try {
+        // Crawl and scan pages
+        for await (const crawledPage of crawler.crawl(this.page, config.url)) {
+          console.log(`📄 Scanning: ${crawledPage.url}`);
+
+          // Scan the page
+          const result = await this.scanPage(this.page, crawledPage);
+          pages.push(result);
+
+          // Log issues found
+          if (result.summary.totalIssues > 0) {
+            console.log(`  ⚠️  Found ${result.summary.totalIssues} issue(s)`);
+          } else {
+            console.log(`  ✅ No issues found`);
+          }
         }
-      }
-      
-      // Cleanup detectors once
-      for (const detector of detectors) {
-        await detector.cleanup?.();
+      } finally {
+        // Cleanup detectors once
+        for (const detector of detectors) {
+          await detector.cleanup?.();
+        }
       }
       
       // Report scan completion

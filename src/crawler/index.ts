@@ -221,9 +221,9 @@ export class Crawler {
         const result = await this.crawlPage(page, url, depth);
         yield result;
       } catch (error) {
-        console.error(`Failed to crawl ${url}:`, error);
-        // Mark as visited to avoid retrying
-        this.visited.add(this.normalizeUrl(url));
+        throw new Error(`Failed to crawl ${url}: ${error instanceof Error ? error.message : String(error)}`, {
+          cause: error,
+        });
       }
     }
   }
