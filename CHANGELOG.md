@@ -5,6 +5,16 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.2](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.1...v2.8.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* **deps:** raise stale override floor(s) to the current patch ([#59](https://github.com/forbiddenlink/repro-in-a-box/issues/59)) ([7cf6a4c](https://github.com/forbiddenlink/repro-in-a-box/commit/7cf6a4c168ea360e3b1302f832b971576056517b))
+* propagate crawl and detector failures to scan callers ([#65](https://github.com/forbiddenlink/repro-in-a-box/issues/65)) ([4d4f379](https://github.com/forbiddenlink/repro-in-a-box/commit/4d4f379cdd20508bd25e7881d72c33f46c72dc4a))
+* **security:** pin transitive dependencies off their open advisories ([#61](https://github.com/forbiddenlink/repro-in-a-box/issues/61)) ([58dd67d](https://github.com/forbiddenlink/repro-in-a-box/commit/58dd67da875c46054cda0e8f425169d44f2172aa))
+* **test:** memory benchmark measured garbage, not leaks ([#62](https://github.com/forbiddenlink/repro-in-a-box/issues/62)) ([e23bc5e](https://github.com/forbiddenlink/repro-in-a-box/commit/e23bc5ee019ff842d34d41ba9e1f7bdd0ebf4113))
+
 ## [2.8.1](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.0...v2.8.1) (2026-09-02)
 
 
