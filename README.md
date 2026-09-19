@@ -120,11 +120,11 @@ Complete documentation available in the [docs/](./docs/) directory:
 repro scan <url> [options]
 
 Options:
-  -d, --max-depth <number>    Maximum crawl depth (default: 2)
-  -p, --max-pages <number>    Maximum pages to scan (default: 10)
-  -r, --rate-limit <ms>       Rate limit between requests (default: 1000)
+  -d, --max-depth <number>    Maximum crawl depth (default: 3)
+  -p, --max-pages <number>    Maximum pages to scan (default: 100)
+  -r, --rate-limit <ms>       Rate limit between requests (default: 100)
   -o, --output <path>         Output path for results
-  -f, --format <type>         Output format: json, html (default: json)
+  -f, --format <type>         Output format: json, html, markdown (default: json)
   --bundle                    Create reproducible ZIP bundle (includes HAR + screenshots)
   --screenshots               Capture screenshots when issues detected  
   --record-har                Record HAR file during scan
@@ -373,7 +373,7 @@ export default {
 ```json
 {
   "output": {
-    "format": "json",      // json | text | csv | html
+    "format": "json",      // json | text | csv | html | markdown
     "path": "./repro-results",  // Output directory
     "verbose": false,      // Detailed logging
     "quiet": false         // Suppress output except errors
