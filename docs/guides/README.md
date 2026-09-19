@@ -145,14 +145,19 @@ Create `.reprorc.json` in project root:
 
 ### Environment Variables
 
+No API keys are required; scans run entirely on local Playwright. The only environment
+variables read are logging flags:
+
 ```bash
-export REPRO_CONFIG=/path/to/.reprorc.json
-export REPRO_MAX_PAGES=100
-export REPRO_OUTPUT_DIR=./results
-export REPRO_VERBOSE=true
+export DEBUG=true      # verbose diagnostic output
+export VERBOSE=true     # verbose logging
+export SILENT=true      # suppress logging
 
 npx repro-in-a-box scan https://example.com
 ```
+
+Use CLI flags (`--nav-timeout`, `--output`, etc.) or a config file for everything else; see
+[Configuration](#configuration) above.
 
 ### CLI Override
 
@@ -209,5 +214,5 @@ Choose your use case:
 
 ---
 
-**Last Updated**: February 16, 2025  
-**Version**: v2.7.0
+See [package.json](../../package.json) and [CHANGELOG.md](../../CHANGELOG.md) for the current
+version; version strings in prose drift (see root `CLAUDE.md` Gotchas).
