@@ -1,8 +1,8 @@
 # Repro-in-a-Box Roadmap
 
-**Current Version:** v2.9.0 🚀
-**Status:** Production-ready, 247 tests, 12 detectors, ~85% coverage
-**Published:** March 7, 2026
+**Shipped Version:** see `package.json`/`CHANGELOG.md` for the current published version
+(version strings in this file's prose drift; the per-feature checkboxes below are current).
+**Status:** Production-ready, 12 detectors, ~85% coverage
 
 ---
 

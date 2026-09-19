@@ -3,7 +3,7 @@
 Autonomous QA CLI that finds bugs on a site, captures reproducible evidence (HAR files plus
 screenshots), validates reproducibility by replaying network traffic, and exposes an MCP
 server for Claude Desktop integration. Published npm package (bin: `repro`), current version
-2.8.1 per `package.json`/`CHANGELOG.md` (README badges are stale, see CODE ISSUES).
+2.8.3 per `package.json`/`CHANGELOG.md` (README badges are stale, see CODE ISSUES).
 
 Repo: https://github.com/forbiddenlink/repro-in-a-box
 
@@ -61,9 +61,10 @@ No API keys required; this runs entirely on local Playwright. Logging flags only
 
 ## Gotchas
 
-- The README's version badge (2.9.0), test-count badge (247+), and the "Current Version:
-  2.5.0" line near the bottom all disagree with each other and with `package.json` (2.8.1).
-  Trust `package.json` and `CHANGELOG.md` over README prose/badges for version and test counts.
+- README previously carried conflicting hardcoded version/test-count badges and footer lines
+  (2.9.0 badge, 247+ tests, "Current Version: 2.5.0"); removed 2026-09-19 in favor of pointing
+  to `package.json`/`CHANGELOG.md`. If a version/test-count claim resurfaces in prose, trust
+  `package.json` and `CHANGELOG.md` over it, and prefer a pointer over a hardcoded number.
 - Both ESLint (`.eslintrc.json`, type-checked rules via `tsconfig.eslint.json`) and Biome are
   configured; `pnpm run lint` uses ESLint, Biome commands are separate and not run by CI.
 - `NODE_OPTIONS=--expose-gc` is required for the test scripts because the memory-leak detector

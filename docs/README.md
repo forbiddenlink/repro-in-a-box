@@ -1,6 +1,6 @@
 # Documentation Index
 
-Welcome to Repro-in-a-Box documentation. Find guides, API references, troubleshooting help, and session summaries below.
+Welcome to Repro-in-a-Box documentation. Find guides, API references, and troubleshooting help below.
 
 ## 📚 Quick Navigation
 
@@ -14,12 +14,8 @@ Essential guides for using and integrating Repro-in-a-Box:
 - **[Progress Reporting](./guides/progress.md)** - Real-time feedback, formats, integration
 - **[Integration & API](./guides/integration.md)** - Node.js library, CLI, MCP server, CI/CD
 - **[GitHub Action](./guides/github-action.md)** - Composite action for scanning in CI
+- **[Plugins](./guides/plugins.md)** - Writing custom detectors as plugins
 - **[Troubleshooting](./guides/troubleshooting.md)** - Common issues, solutions, diagnostics
-
-### Session History
-Implementation summaries and session reports:
-
-- **[Latest Session (Feb 16, 2025)](./session/2025-02-16-complete.md)** - Complete summary of all 5 tasks
 
 ---
 
@@ -68,6 +64,8 @@ Implementation summaries and session reports:
 | [Asset Blocking](./guides/asset-blocking.md) | Performance | Resource types, benchmarks, use cases |
 | [Progress](./guides/progress.md) | Monitoring | Formats, events, integration |
 | [Integration](./guides/integration.md) | Beyond CLI | Library, MCP server, CI/CD, webhooks |
+| [GitHub Action](./guides/github-action.md) | CI scanning | Composite action, artifact upload |
+| [Plugins](./guides/plugins.md) | Extensibility | Custom detectors as npm packages/local modules |
 | [Troubleshooting](./guides/troubleshooting.md) | Problem solving | Common issues, solutions, diagnostics |
 
 ---
@@ -159,29 +157,24 @@ npx repro-in-a-box scan https://example.com \
 ```
 docs/
 ├── README.md (this file - documentation index)
-├── guides/ (feature guides)
-│   ├── README.md           (getting started & nav)
-│   ├── logging.md          (logging & error handling)
-│   ├── timeout-config.md   (timeout configuration)
-│   ├── asset-blocking.md   (performance optimization)
-│   ├── progress.md         (progress reporting)
-│   ├── integration.md      (API & integration)
-│   └── troubleshooting.md  (problem solving)
-└── session/ (session summaries & reports)
-    └── 2025-02-16-complete.md  (latest session)
+├── examples/
+│   └── sample-scan-report.md
+└── guides/ (feature guides)
+    ├── README.md           (getting started & nav)
+    ├── logging.md          (logging & error handling)
+    ├── timeout-config.md   (timeout configuration)
+    ├── asset-blocking.md   (performance optimization)
+    ├── progress.md         (progress reporting)
+    ├── integration.md      (API & integration)
+    ├── github-action.md    (CI scanning)
+    ├── plugins.md          (writing custom detectors)
+    └── troubleshooting.md  (problem solving)
 ```
 
 ---
 
 ## Version Info
 
-**Current Version**: v2.7.0  
-**Latest Update**: February 16, 2025  
-**Documentation Status**: ✅ Complete  
-**Tests**: ✅ 170/170 passing  
-
-For detailed version history, see [CHANGELOG.md](../../CHANGELOG.md) and [ROADMAP.md](../../ROADMAP.md).
-
----
-
-**Last Updated**: February 16, 2025
+See [package.json](../package.json) and [CHANGELOG.md](../CHANGELOG.md) for the current
+published version and full release history. Trust those over any version string in this
+directory's prose, which drifts (see the root `CLAUDE.md` Gotchas section).

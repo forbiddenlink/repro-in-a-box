@@ -12,19 +12,19 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 2. **Install Dependencies**
    ```bash
-   npm install
+   pnpm install
    npx playwright install chromium
    ```
 
 3. **Build & Test**
    ```bash
-   npm run build
-   npm test
+   pnpm run build
+   pnpm run test:run
    ```
 
 4. **Run Locally**
    ```bash
-   npm run dev -- scan https://example.com
+   pnpm run dev -- scan https://example.com
    ```
 
 ---
@@ -74,13 +74,13 @@ git checkout -b fix/issue-number-description
 ### 3. Add Tests
 ```bash
 # Run tests in watch mode
-npm test
+pnpm test
 
 # Run specific test file
-npm test -- tests/your-test.test.ts
+pnpm test -- tests/your-test.test.ts
 
 # Check coverage
-npm test -- --coverage --run
+pnpm run test:run -- --coverage
 ```
 
 **Test Requirements:**
@@ -94,10 +94,10 @@ npm test -- --coverage --run
 npx tsc --noEmit
 
 # Build (catch any TS errors)
-npm run build
+pnpm run build
 
 # Run all tests
-npm test
+pnpm run test:run
 ```
 
 ### 5. Commit & Push
@@ -117,22 +117,9 @@ git push origin feature/your-feature-name
 
 ## 🎯 Priority Features
 
-Looking for something to work on? Check out these high-priority features from [ROADMAP.md](ROADMAP.md):
-
-### v2.6: Developer Experience
-- [ ] **Config file support** (`.reprorc.json`)
-- [ ] **Interactive setup** (`repro init` command)
-- [ ] **Output formats** (JSON, CSV, GitHub Actions)
-- [ ] **Better error messages**
-
-### v2.7: New Detectors
-- [ ] **SEO detector** (meta tags, Open Graph, structured data)
-- [ ] **Performance detector** (bundle size, render blocking)
-- [ ] **Security detector** (CSP, HTTPS, secure cookies)
-
-### v2.8: Reporting
-- [ ] **HTML report generator** (charts, graphs, screenshots)
-- [ ] **GitHub Actions integration**
+Looking for something to work on? See [ROADMAP.md](ROADMAP.md) for the current per-feature
+checkbox status (most early items above are already shipped; the file tracks what's actually
+still open).
 
 ---
 
@@ -235,11 +222,8 @@ src/
 └── scanner/             # Main scanning orchestration
 
 tests/
-├── detectors.test.ts             # Detector tests
-├── cli.test.ts                   # CLI tests
-├── detector-edge-cases.test.ts   # Edge case tests
-├── performance.test.ts           # Performance benchmarks
-└── integration/                  # Integration tests
+├── *.test.ts                     # unit tests, mirror src/ structure
+└── integration/                  # full scan workflow, MCP tool validation
 ```
 
 ---
@@ -297,39 +281,16 @@ describe('My Detector', () => {
 
 ### 4. Update Documentation
 - Add to README.md detector list
-- Update TECHNICAL_SPEC.md if needed
 - Add usage examples
 
 ---
 
 ## 📦 Release Process
 
-Maintainers only:
-
-1. **Update Version**
-   ```bash
-   npm version patch|minor|major
-   ```
-
-2. **Update CHANGELOG.md**
-   - Add new version section
-   - Document all changes
-
-3. **Build & Test**
-   ```bash
-   npm run build
-   npm test
-   ```
-
-4. **Publish**
-   ```bash
-   npm publish
-   ```
-
-5. **Create GitHub Release**
-   - Tag: `v2.x.x`
-   - Copy CHANGELOG section
-   - Add migration notes if needed
+Releases are automated by [release-please](.github/workflows/release-please.yml): it opens a
+release PR that bumps the version and updates CHANGELOG.md from conventional commit messages.
+Merging that PR creates the GitHub release and tag. Maintainers do not run `npm version`
+manually; publishing to npm (if not automated) is `pnpm publish` after the release PR merges.
 
 ---
 
@@ -350,8 +311,7 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ## ❓ Questions?
 
-- Check the [README](README.md)
-- Read the [TECHNICAL_SPEC](TECHNICAL_SPEC.md)
+- Check the [README](README.md) and [CLAUDE.md](CLAUDE.md)
 - Browse [existing issues](https://github.com/forbiddenlink/repro-in-a-box/issues)
 - Open a [new discussion](https://github.com/forbiddenlink/repro-in-a-box/discussions)
 

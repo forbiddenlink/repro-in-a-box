@@ -1,25 +1,25 @@
-# Repro-in-a-Box v2.9 🎁
+# Repro-in-a-Box 🎁
 
 **Find bugs. Freeze them. Ship them.**
 
 Autonomous QA agent that finds bugs on your site, captures reproducible evidence (HAR files + screenshots), validates reproducibility, and provides Claude Desktop integration via MCP.
 
-[![Version](https://img.shields.io/badge/version-2.9.0-blue)](https://github.com/forbiddenlink/repro-in-a-box)
-[![Tests](https://img.shields.io/badge/tests-247+-green)]()
-[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+See [package.json](./package.json) and [CHANGELOG.md](./CHANGELOG.md) for the current
+published version; test/coverage figures below are a point-in-time snapshot, not a live badge.
 
 ## ✨ Features
 
 - **12 Built-in Detectors**: JavaScript errors, network failures, broken assets, accessibility (WCAG 2.1), web vitals, mixed content, broken links, console warnings, SEO, performance, security headers, memory leaks
 - **Plugin API**: Load `repro-plugin-*` packages or local modules with custom detectors and scan hooks
-- **Production-Grade Infrastructure** ✨ NEW v2.7:
+- **Production-Grade Infrastructure**:
   - Structured logging with multiple output levels
   - Comprehensive error handling with exit codes
   - Configurable timeouts for navigation, actions, and detection
   - Asset blocking for 30-40% faster scans
   - Real-time progress reporting with multiple formats
-- **Production-Grade Testing**: 170 tests across 11 test files, ~85% code coverage
+- **Well Tested**: Vitest suite with ~85% code coverage (see CI for the current test count)
 - **Performance Benchmarked**: <100ms detector attach, <500ms collect, <1s for 100 issues
 - **Multi-Page Crawler**: Configurable depth, rate limiting, same-domain filtering
 - **Auto-Bundling**: Creates reproducible ZIP packages with HAR files and screenshots
@@ -32,10 +32,10 @@ Autonomous QA agent that finds bugs on your site, captures reproducible evidence
 
 ```bash
 # Install
-npm install
+pnpm install
 
 # Build
-npm run build
+pnpm run build
 
 # Create config file (optional but recommended)
 repro init
@@ -50,10 +50,10 @@ repro validate repro-your-site-com-*.zip
 repro diff scan-results-1.json scan-results-2.json
 
 # Start MCP server (for Claude Desktop)
-npm run mcp
+pnpm run mcp
 ```
 
-## � Documentation
+## 📚 Documentation
 
 Complete documentation available in the [docs/](./docs/) directory:
 
@@ -67,80 +67,50 @@ Complete documentation available in the [docs/](./docs/) directory:
 
 **See [docs/README.md](./docs/README.md) for the complete documentation index.**
 
-## �📦 What's in the Box
+## 📦 What's in the Box
 
-### ✅ Week 1-5: Complete Implementation
+#### 12 Detectors (`src/detectors/`)
 
-#### 7 Working Detectors
+1. **JavaScript Errors** (`js-errors`) - console errors/warnings, uncaught exceptions,
+   unhandled promise rejections, full stack traces
+2. **Network Errors** (`network-errors`) - failed HTTP requests (4xx/5xx), timeouts, DNS
+   failures, connection errors
+3. **Broken Assets** (`broken-assets`) - missing images/scripts/stylesheets/fonts/media,
+   any resource with HTTP >=400
+4. **Accessibility** (`accessibility`) - WCAG 2.1 A/AA via axe-core: alt text, color
+   contrast, form labels, landmark structure
+5. **Web Vitals** (`web-vitals`) - Core Web Vitals (CLS, INP, LCP) plus FCP/TTFB
+6. **Mixed Content** (`mixed-content`) - HTTP resources on HTTPS pages, active/passive
+   mixed content
+7. **Broken Links** (`broken-links`) - HTTP 4xx/5xx and network failures across all links
+   on the page
+8. **Console Warnings** (`console-warnings`) - console warnings, deprecations, and
+   framework-specific issues
+9. **Memory Leak** (`memory-leak`) - growing heap, event listener leaks, detached DOM nodes
+10. **Performance** (`performance`) - render-blocking resources, large assets, image
+    optimization
+11. **Security** (`security`) - HTTPS enforcement, security headers, cookie flags, SRI
+    validation
+12. **SEO** (`seo`) - meta tags, Open Graph, Twitter Cards, structured data
 
-1. **JavaScript Errors** (`js-errors`)
-   - Console errors and warnings
-   - Uncaught exceptions
-   - Unhandled promise rejections
-   - Full stack traces
+#### Auto-Bundling
 
-2. **Network Errors** (`network-errors`)
-   - Failed HTTP requests (4xx, 5xx)
-   - Timeouts and DNS failures
-   - Connection errors
-   - Request/response details
-
-3. **Broken Assets** (`broken-assets`)
-   - Missing images, scripts, stylesheets
-   - Failed fonts and media
-   - Any resource with HTTP ≥400
-
-4. **Accessibility** (`accessibility`)
-   - WCAG 2.1 Level A & AA via axe-core
-   - Missing alt text
-   - Color contrast issues
-   - Form label violations
-   - Landmark structure problems
-
-5. **Web Vitals** (`web-vitals`)
-   - Core Web Vitals (CLS, INP, LCP)
-   - FCP, TTFB measurements
-   - Performance thresholds
-   - Only reports issues (<75th percentile)
-
-6. **Mixed Content** (`mixed-content`)
-   - HTTP resources on HTTPS pages
-   - Active/passive mixed content
-   - Security downgrade detection
-
-7. **Broken Links** (`broken-links`)
-   - Checks all links on page
-   - HTTP 4xx/5xx detection
-   - Network failure tracking
-   - HEAD request optimization
-
-#### Auto-Bundling (Week 2)
-
-- Creates ZIP bundles with:
-  - Scan results JSON
-  - HAR file (full network recording)
-  - Screenshots of issues
-  - Reproduction script
-  - Setup README
+- Creates ZIP bundles with scan results JSON, HAR file (full network recording),
+  screenshots of issues, reproduction script, and setup README
 - One command to create reproducible packages
-- Bundle size: typically 100-500KB
 
-#### HAR Replay & Validation (Week 3-4)
+#### HAR Replay & Validation
 
 - Replays HAR files using Playwright's `routeFromHAR`
-- Runs scans 3x to validate reproducibility
-- Calculates reproducibility score (0-100%)
-- Detailed diff analysis
-- Consistency tracking (always/never/sometimes present)
+- Runs scans multiple times to validate reproducibility
+- Calculates a reproducibility score
+- Detailed diff analysis and consistency tracking (always/never/sometimes present)
 
-#### MCP Server (Week 5)
+#### MCP Server
 
 - stdio transport for Claude Desktop
-- Three tools:
-  - `scan_site`: Scan and bundle websites
-  - `validate_reproduction`: Validate HAR replay
-  - `diff_scans`: Compare scan results
-- Ready for AI-powered bug hunting
+- Tools: `scan_site` (scan and bundle websites), `validate_reproduction` (validate HAR
+  replay), `diff_scans` (compare scan results)
 
 ## 📋 Commands
 
@@ -492,7 +462,7 @@ repro scan https://localhost:3000 --no-headless --max-pages 5
 ```bash
 repro scan https://prod.example.com --config repro-prod.json
 ```
-## � MCP Server Integration
+## 🔌 MCP Server Integration
 
 Repro-in-a-Box includes an MCP server for Claude Desktop integration.
 
@@ -500,7 +470,7 @@ Repro-in-a-Box includes an MCP server for Claude Desktop integration.
 
 1. Build the project:
 ```bash
-npm run build
+pnpm run build
 ```
 
 2. Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
@@ -541,23 +511,20 @@ Compare scans:
 ## 🧪 Testing
 
 ```bash
-# Run all tests
-npm test
+# Run all tests once (CI-style)
+pnpm run test:run
+
+# Run tests in watch mode (default)
+pnpm test
 
 # Run tests with UI
-npm run test:ui
-
-# Run tests in watch mode
-npm test -- --watch
+pnpm run test:ui
 
 # Generate coverage report
-npm test -- --coverage
+pnpm run test:run -- --coverage
 ```
 
-Current test coverage:
-- ✅ Diff utility: 10 tests passing
-- ✅ Detector registry: 5 tests passing
-- ✅ 15 total tests passing
+See CI for the current test count and coverage; see `tests/` (mirrors `src/` structure).
 
 ## 📊 Example Output
 
@@ -580,6 +547,11 @@ Bundle: Yes (includes HAR + screenshots)
   - Web Vitals (web-vitals)
   - Mixed Content (mixed-content)
   - Broken Links (broken-links)
+  - Console Warnings (console-warnings)
+  - Memory Leak (memory-leak)
+  - Performance (performance)
+  - Security (security)
+  - SEO (seo)
 
 🚀 Starting scan...
 
@@ -615,161 +587,49 @@ Issues by category:
 
 ## 🗺️ Roadmap
 
-### ✅ Week 1: Foundation (Complete)
-- [x] Detector framework with lifecycle hooks
-- [x] 7 core detectors (JS errors, network, assets, accessibility, web vitals, mixed content, broken links)
-- [x] CLI framework with Commander
-- [x] Multi-page crawler with rate limiting
-
-### ✅ Week 2: Auto-Bundling (Complete)
-- [x] ZIP creation with HAR + scan results
-- [x] Screenshot capture on issues
-- [x] Reproduction script generation
-- [x] Bundle README generation
-
-### ✅ Week 3-4: Determinism Engine (Complete)
-- [x] HAR recording during scan
-- [x] HAR replay validation (3x runs)
-- [x] Reproducibility scoring (0-100%)
-- [x] Diff utility for comparing scans
-- [x] Consistency analysis
-- [x] `validate` command
-
-### ✅ Week 5: MCP Server (Complete)
-- [x] MCP server with stdio transport
-- [x] `scan_site` tool
-- [x] `validate_reproduction` tool  
-- [x] `diff_scans` tool
-- [x] Claude Desktop integration
-
-### ✅ Week 6: Polish & Testing (Complete - v2.5.0)
-- [x] 119 comprehensive tests (5x increase)
-- [x] ~85% code coverage across all modules
-- [x] Performance benchmarks established
-- [x] Security vulnerabilities fixed
-- [x] npm published successfully
-
-### 🎯 Future Enhancements (v2.6+)
-
-**Developer Experience:**
-- Interactive setup wizard (`repro init`)
-- Configuration file support (`.reprorc.json`)
-- Multiple output formats (JSON, CSV, GitHub Actions)
-- Custom detector plugins API
-
-**New Detectors:**
-- SEO detector (meta tags, Open Graph, structured data)
-- Performance detector (bundle size, render blocking resources)
-- Security detector (CSP violations, mixed content warnings)
-- Console warnings (separate from errors)
-- Memory leak detection
-
-**Advanced Features:**
-- HTML report generator with charts
-- GitHub Action for CI/CD integration
-- Historical trending and comparison
-- Scheduled scanning (cron-like)
-- Webhook notifications (Slack, Discord)
-
-**UI/Visualization:**
-- Web dashboard for scan results
-- Browser extension for one-click scanning
-- Interactive issue explorer
-- Visual diff comparison
+See [ROADMAP.md](./ROADMAP.md) for shipped features and what's still planned.
 
 ## 🏗️ Architecture
 
-```
-src/
-├── detectors/           # Issue detection plugins
-│   ├── base.ts          # Base detector interface
-│   ├── registry.ts      # Detector management
-│   ├── js-errors.ts     # JavaScript error detector
-│   ├── network-errors.ts # Network failure detector
-│   ├── broken-assets.ts  # Asset loading detector
-│   ├── accessibility.ts  # WCAG violations (axe-core)
-│   ├── web-vitals.ts     # Core Web Vitals
-│   ├── mixed-content.ts  # HTTP/HTTPS mixed content
-│   └── broken-links.ts   # Broken link checker
-├── crawler/             # Multi-page web crawler
-│   └── index.ts         # Configurable depth/rate limiting
-├── scanner/             # Orchestrates detectors + crawler
-│   └── index.ts         # Scan lifecycle management
-├── bundler/             # ZIP creation (Week 2)
-│   └── index.ts         # HAR + screenshots + script
-├── determinism/         # HAR replay & validation (Week 3-4)
-│   ├── replayer.ts      # HAR replay via Playwright
-│   ├── diff.ts          # Scan comparison utility
-│   └── __tests__/       # Unit tests
-├── mcp/                 # MCP server (Week 5)
-│   ├── server.ts        # MCP tool implementations
-│   └── index.ts         # stdio transport
-└── cli/                 # Command-line interface
-    ├── index.ts         # CLI entry point
-    └── commands/        # scan, validate, diff
-```
+See the Layout section in [CLAUDE.md](./CLAUDE.md) for the full `src/` breakdown (detectors,
+crawler, scanner, bundler, determinism, reporters, plugins, config, mcp, cli).
 
 ## 🔧 Development
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Watch mode for development
-npm run dev -- scan https://example.com
+pnpm run dev -- scan https://example.com
 
 # Build TypeScript
-npm run build
+pnpm run build
 
-# Run tests (119 tests)
-npm test
+# Run tests
+pnpm run test:run
 
 # Run tests with coverage
-npm test -- --coverage --run
+pnpm run test:run -- --coverage
 
 # Run tests with UI
-npm run test:ui
+pnpm run test:ui
 
 # Start MCP server
-npm run mcp
+pnpm run mcp
 
 # Type check
 npx tsc --noEmit
 ```
 
-### Test Coverage
-
-**v2.5.0 Test Suite:**
-- 9 test files, 1,397 lines of test code
-- 119 tests across all modules
-- ~85% code coverage
-- Performance benchmarks included
-
-**Test Files:**
-- `tests/bundler.test.ts` - Bundle creation & validation
-- `tests/crawler.test.ts` - Multi-page crawling logic
-- `tests/detectors.test.ts` - All 7 detector implementations
-- `tests/cli.test.ts` - CLI command parsing (22 tests)
-- `tests/detector-edge-cases.test.ts` - Edge case coverage (22 tests)
-- `tests/performance.test.ts` - Performance benchmarks (9 benchmarks)
-- `tests/integration/mcp-server.test.ts` - MCP tool validation (35 tests)
+Tests live in `tests/` (mirrors `src/` structure) and `tests/integration/` (full scan
+workflow, MCP tool validation). See CI for the current test count and coverage.
 
 ## 🤝 Contributing
 
-Contributions are welcome! This project follows a 6-week development plan:
-- Weeks 1-6: Core features & testing (✅ Complete)
-- v2.5.0: Production-grade quality with comprehensive test coverage
-
-See [ENHANCEMENT_SUMMARY.md](ENHANCEMENT_SUMMARY.md) for v2.5.0 improvements.
+Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for development
+guidelines and [ROADMAP.md](./ROADMAP.md) for what's planned.
 
 ## 📝 License
 
 MIT © 2026
-
----
-
-**Current Version**: 2.5.0 🚀  
-**Test Coverage**: 119 tests, ~85% coverage  
-**Status**: Production-ready  
-**Status**: Week 6 in progress - Final polish before v2.0.0 release  
-**Tests**: 15/15 passing ✅
