@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.4](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.3...v2.8.4) (2026-09-21)
+
+
+### Bug Fixes
+
+* **security:** raise the hono override floor past its own advisory ([#68](https://github.com/forbiddenlink/repro-in-a-box/issues/68)) ([5ace5cd](https://github.com/forbiddenlink/repro-in-a-box/commit/5ace5cd00ddf57cda834eb2aa806958e1aad4ae0))
+
 ## [2.8.3](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.2...v2.8.3) (2026-09-09)
 
 
