@@ -37,6 +37,9 @@ pnpm install
 # Build
 pnpm run build
 
+# Put `repro` on your PATH (once), or use `node dist/cli/index.js` in place of `repro` below
+pnpm link --global
+
 # Create config file (optional but recommended)
 repro init
 
@@ -130,6 +133,7 @@ Options:
   --record-har                Record HAR file during scan
   --no-headless               Run browser in visible mode
   --same-domain-only          Only crawl pages on the same domain (default: true)
+  --fail-on <severity>        Exit 1 if an issue at or above none|info|warning|error|critical is found (default: none)
 ```
 
 Examples:

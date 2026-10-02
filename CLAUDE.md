@@ -9,13 +9,13 @@ Repo: https://github.com/forbiddenlink/repro-in-a-box
 
 ## Stack
 
-- TypeScript 7.0.2 (ESM, `"type": "module"`), Node >=20 (`.nvmrc` pins 20)
+- TypeScript 7.0.2 (ESM, `"type": "module"`), Node >=22 (`.nvmrc` pins 22; Node 20 hit EOL 2026-04-30)
 - Playwright for browser automation, `@axe-core/playwright` / `axe-playwright` for
   accessibility scanning, `web-vitals` for performance metrics
 - `@modelcontextprotocol/sdk` for the MCP server
 - `commander` for the CLI, `inquirer` for interactive prompts, `adm-zip` for bundling
 - Zod for config validation
-- Vitest 4 for tests, ESLint (typescript-eslint, type-checked rules) plus Biome
+- Vitest 4 for tests, Biome for lint (formatter off; CI gates on `pnpm run lint`)
 - pnpm (pinned `pnpm@10.34.5`)
 
 ## Commands (pnpm)
@@ -24,8 +24,8 @@ Repo: https://github.com/forbiddenlink/repro-in-a-box
 - `pnpm run dev` - run the CLI from source via `tsx src/cli/index.ts`
 - `pnpm test` / `pnpm run test:run` / `pnpm run test:ui` - Vitest (with `--expose-gc` for
   memory-leak detector tests)
-- `pnpm run lint` / `pnpm run lint:fix` - ESLint over `src/**/*.ts` and `tests/**/*.ts`
-- `pnpm run biome:check` / `pnpm run biome:fix` / `pnpm run biome:format`
+- `pnpm run lint` / `pnpm run lint:fix` - Biome check (CI gates on it)
+- `pnpm run typecheck` - `tsc --noEmit`
 - `pnpm run mcp` - start the MCP server from `dist/mcp/index.js` (requires a build first)
 
 ### CLI usage (once built or installed)
@@ -65,7 +65,9 @@ No API keys required; this runs entirely on local Playwright. Logging flags only
   (2.9.0 badge, 247+ tests, "Current Version: 2.5.0"); removed 2026-09-19 in favor of pointing
   to `package.json`/`CHANGELOG.md`. If a version/test-count claim resurfaces in prose, trust
   `package.json` and `CHANGELOG.md` over it, and prefer a pointer over a hardcoded number.
-- Both ESLint (`.eslintrc.json`, type-checked rules via `tsconfig.eslint.json`) and Biome are
-  configured; `pnpm run lint` uses ESLint, Biome commands are separate and not run by CI.
+- Biome is the only linter (ESLint removed). Its formatter is off on purpose, so the codebase's
+  existing style is not reformatted; `docs/examples` (generated sample report) is excluded.
+- `scan` exits 0 by default; pass `--fail-on <severity>` for a non-zero exit. The CLI exit-code
+  tests (`tests/cli/scan-exit-codes.test.ts`) spawn real scans and take ~20s.
 - `NODE_OPTIONS=--expose-gc` is required for the test scripts because the memory-leak detector
   tests force garbage collection; running `vitest` directly without that flag will fail those tests.
