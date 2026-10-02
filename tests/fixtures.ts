@@ -46,6 +46,8 @@ type WorkerFixtures = {
  */
 export const test = base.extend<TestFixtures, WorkerFixtures>({
   // Worker-scoped browser: launched once per worker, reused across tests
+  // Playwright requires a destructuring pattern here, even an empty one.
+  // biome-ignore lint/correctness/noEmptyPattern: Playwright fixture signature
   browser: [async ({}, use) => {
     const browser = await chromium.launch({
       headless: true,

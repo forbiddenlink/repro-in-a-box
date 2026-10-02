@@ -195,28 +195,26 @@ npx repro-in-a-box scan https://example.com \
 
 ## MCP Server Integration
 
-### Starting the Server
+### Starting the server
 
-```bash
-# Via npx
-npx repro-in-a-box mcp-server --port 3001
-
-# Via Docker
-docker run -p 3001:3001 repro-in-a-box mcp-server
-```
+The MCP server speaks stdio and is started by your MCP client. There is no `mcp-server`
+CLI command and no `--port` option. Build first (`pnpm run build`), then point the client
+at `dist/mcp/index.js`. To smoke-test it by hand, run `pnpm run mcp`.
 
 ### Configuration
 
-**.claude/settings.json** (Claude IDE):
+**Claude Code:**
+```bash
+claude mcp add repro-in-a-box -- node /absolute/path/to/repro-in-a-box/dist/mcp/index.js
+```
+
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS; restart the app after editing):
 ```json
 {
   "mcpServers": {
-    "repro-audit": {
-      "command": "npx",
-      "args": ["repro-in-a-box", "mcp-server", "--port", "3001"],
-      "env": {
-        "LOG_LEVEL": "info"
-      }
+    "repro-in-a-box": {
+      "command": "node",
+      "args": ["/absolute/path/to/repro-in-a-box/dist/mcp/index.js"]
     }
   }
 }
@@ -262,7 +260,7 @@ jobs:
       
       - uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '22'
       
       - name: Install
         run: npm install -g repro-in-a-box
@@ -297,13 +295,13 @@ jobs:
 
 ```yaml
 website_audit:
-  image: node:20
+  image: node:22
   script:
     - npm install -g repro-in-a-box
     - npx repro-in-a-box scan https://example.com
       --progress minimal
       --output results.json
-      --exit-code
+      --fail-on error
   artifacts:
     reports:
       results: results.json
@@ -313,7 +311,7 @@ website_audit:
 ### Docker Integration
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:22-alpine
 
 RUN npm install -g repro-in-a-box
 

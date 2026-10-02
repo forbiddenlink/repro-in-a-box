@@ -170,7 +170,7 @@ npx repro-in-a-box scan https://example.com \
 
 ### Docker
 ```dockerfile
-FROM node:20-alpine
+FROM node:22-alpine
 RUN npm install -g repro-in-a-box
 
 ENV REPORT_FORMAT=json

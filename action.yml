@@ -22,8 +22,12 @@ inputs:
     description: 'Human report format: html or markdown (JSON results always written)'
     required: false
     default: 'html'
+  fail-on:
+    description: 'Fail the job when an issue at or above this severity is found: none, info, warning, error, critical'
+    required: false
+    default: 'none'
   fail-on-issues:
-    description: 'Fail the job when any issues are found'
+    description: 'Deprecated shorthand: true behaves like fail-on: info when fail-on is none'
     required: false
     default: 'false'
   comment-on-pr:
@@ -52,7 +56,7 @@ runs:
     - name: Setup Node
       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
       with:
-        node-version: '20'
+        node-version: '22'
 
     - name: Install pnpm
       uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
@@ -77,6 +81,7 @@ runs:
         REPRO_MAX_DEPTH: ${{ inputs.max-depth }}
         REPRO_FORMAT: ${{ inputs.format }}
         REPRO_OUT_DIR: ${{ inputs.output-dir }}
+        REPRO_FAIL_ON: ${{ inputs.fail-on }}
         REPRO_FAIL: ${{ inputs.fail-on-issues }}
       run: |
         set -euo pipefail
@@ -94,11 +99,26 @@ runs:
             ;;
         esac
 
+        FAIL_ON="$REPRO_FAIL_ON"
+        if [[ "$FAIL_ON" == "none" && "$REPRO_FAIL" == "true" ]]; then
+          FAIL_ON="info"
+        fi
+
+        # Capture the exit code instead of letting set -e abort: the report, outputs and
+        # artifact upload must happen even when the scan trips the --fail-on threshold.
+        SCAN_EXIT=0
         node "$ACTION_PATH/dist/cli/index.js" scan "$REPRO_URL" \
           --max-pages "$REPRO_MAX_PAGES" \
           --max-depth "$REPRO_MAX_DEPTH" \
           --format json \
-          --output "$JSON_PATH"
+          --output "$JSON_PATH" \
+          --fail-on "$FAIL_ON" || SCAN_EXIT=$?
+
+        # Exit 1 is the threshold signal only when results were written; anything else is a real failure.
+        if [[ "$SCAN_EXIT" != "0" && ! -s "$JSON_PATH" ]]; then
+          echo "Scan failed before producing results (exit $SCAN_EXIT)" >&2
+          exit "$SCAN_EXIT"
+        fi
 
         ACTION_PATH="$ACTION_PATH" JSON_PATH="$JSON_PATH" REPORT_PATH="$REPORT_PATH" FORMAT="$FORMAT" \
         node --input-type=module <<'EOF'
@@ -122,13 +142,13 @@ runs:
         echo "issue-count=$ISSUE_COUNT" >> "$GITHUB_OUTPUT"
         echo "Report: $REPORT_PATH · Issues: $ISSUE_COUNT"
 
-        if [[ "$REPRO_FAIL" == "true" && "$ISSUE_COUNT" != "0" ]]; then
-          echo "Failing because issues were found ($ISSUE_COUNT)" >&2
-          exit 1
+        if [[ "$SCAN_EXIT" != "0" ]]; then
+          echo "Failing: issues at or above severity '$FAIL_ON' were found (total issues: $ISSUE_COUNT)" >&2
+          exit "$SCAN_EXIT"
         fi
 
     - name: Comment markdown report on PR
-      if: ${{ inputs.comment-on-pr == 'true' && github.event_name == 'pull_request' }}
+      if: ${{ always() && steps.scan.outputs.report-path != '' && inputs.comment-on-pr == 'true' && github.event_name == 'pull_request' }}
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
@@ -151,6 +171,7 @@ runs:
         gh pr comment "$PR_NUMBER" --body-file /tmp/repro-pr-comment.md
 
     - name: Upload report artifacts
+      if: ${{ always() }}
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
       with:
         name: repro-scan-report
