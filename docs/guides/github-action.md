@@ -24,7 +24,7 @@ jobs:
           max-pages: '5'
           max-depth: '2'
           format: html
-          fail-on-issues: 'false'
+          fail-on: none
 
       - name: Summary
         run: |
@@ -40,7 +40,8 @@ jobs:
 | `max-pages` | `10` | Crawl page cap |
 | `max-depth` | `2` | Crawl depth |
 | `format` | `html` | `html` or `markdown` |
-| `fail-on-issues` | `false` | Fail the job when issues > 0 |
+| `fail-on` | `none` | Fail the job when an issue at or above this severity is found: `none`, `info`, `warning`, `error`, `critical`. The report and artifacts are still produced before the job fails. |
+| `fail-on-issues` | `false` | Deprecated. `true` behaves like `fail-on: info`. |
 | `comment-on-pr` | `false` | Post the markdown report as a PR comment (`format` must be `markdown`) |
 | `output-dir` | `repro-results` | Artifact directory |
 

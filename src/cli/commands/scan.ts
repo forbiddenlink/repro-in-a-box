@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { createScanRegistry } from '../../plugins/index.js';
@@ -9,6 +9,26 @@ import { generateHtmlReport } from '../../reporters/html-reporter.js';
 import { generateMarkdownReport } from '../../reporters/markdown-reporter.js';
 import { logger, createChildLogger } from '../../utils/logger.js';
 import { handleError } from '../../utils/errors.js';
+import { IssueSeverity } from '../../detectors/base.js';
+
+const FAIL_ON_LEVELS = ['none', 'info', 'warning', 'error', 'critical'] as const;
+type FailOn = (typeof FAIL_ON_LEVELS)[number];
+
+/** Count issues at or above the given severity. `none` never counts anything. */
+export function countAtOrAbove(bySeverity: Record<string, number>, failOn: FailOn): number {
+  if (failOn === 'none') return 0;
+  const rank: Record<string, number> = {
+    [IssueSeverity.INFO]: 1,
+    [IssueSeverity.WARNING]: 2,
+    [IssueSeverity.ERROR]: 3,
+    [IssueSeverity.CRITICAL]: 4,
+  };
+  const threshold = rank[failOn];
+  return Object.entries(bySeverity).reduce(
+    (sum, [sev, n]) => sum + ((rank[sev] ?? 0) >= threshold ? n : 0),
+    0,
+  );
+}
 
 export const scanCommand = new Command('scan')
   .description('Scan a website for issues')
@@ -33,6 +53,11 @@ export const scanCommand = new Command('scan')
   .option('--no-asset-blocking', 'Disable all asset blocking (default: blocking enabled)')
   .option('--progress <format>', 'Progress reporting format: simple, detailed, minimal (default: simple)')
   .option('-c, --config <path>', 'Path to config file')
+  .addOption(
+    new Option('--fail-on <severity>', 'Exit 1 when an issue at or above this severity is found')
+      .choices([...FAIL_ON_LEVELS])
+      .default('none'),
+  )
   .option('--verbose', 'Verbose output')
   .action(async (url: string, options) => {
     // Configure logging
@@ -203,14 +228,17 @@ export const scanCommand = new Command('scan')
         });
       }
       
-      // Exit with error code if issues found
-      if (results.summary.totalIssues > 0) {
-        scanLogger.warn('Scan completed with issues', {
-          issueCount: results.summary.totalIssues
+      // Exit non-zero only when an issue meets the requested --fail-on severity
+      const failOn = options.failOn as FailOn;
+      const failing = countAtOrAbove(results.summary.bySeverity, failOn);
+      if (failing > 0) {
+        scanLogger.warn(`Scan found issues at or above "${failOn}"`, {
+          issueCount: failing,
+          totalIssues: results.summary.totalIssues,
         });
         process.exit(1);
       }
-      
+
       scanLogger.info('✅ Scan completed successfully');
     } catch (error) {
       scanLogger.error('Scan failed', error instanceof Error ? error : new Error(String(error)));
