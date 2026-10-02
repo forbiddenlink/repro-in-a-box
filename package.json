@@ -33,11 +33,9 @@
     "test:run": "NODE_OPTIONS=--expose-gc vitest run",
     "test:ui": "NODE_OPTIONS=--expose-gc vitest --ui",
     "mcp": "node dist/mcp/index.js",
-    "lint": "eslint src/**/*.ts tests/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix",
-    "biome:check": "biome check .",
-    "biome:fix": "biome check . --write",
-    "biome:format": "biome format . --write"
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "qa",
@@ -62,10 +60,8 @@
   },
   "homepage": "https://github.com/forbiddenlink/repro-in-a-box#readme",
   "dependencies": {
-    "@axe-core/playwright": "^4.13.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@playwright/test": "^1.62.1",
-    "@types/adm-zip": "^0.5.7",
     "adm-zip": "^0.6.0",
     "axe-playwright": "^2.2.2",
     "chalk": "^6.0.0",
@@ -73,23 +69,18 @@
     "inquirer": "^14.2.0",
     "playwright": "^1.62.1",
     "tsx": "^4.23.12",
-    "web-vitals": "^6.2.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.14",
-    "@types/inquirer": "9.0.10",
     "@types/node": "26.4.0",
-    "@typescript-eslint/eslint-plugin": "8.68.0",
-    "@typescript-eslint/parser": "8.68.0",
     "@vitest/coverage-v8": "4.1.11",
     "@vitest/ui": "4.1.11",
-    "eslint": "10.9.1",
     "typescript": "7.0.2",
     "vitest": "4.1.11"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "private": false,
   "pnpm": {

@@ -83,7 +83,7 @@ export class JavaScriptErrorsDetector extends BaseDetector {
     );
     
     // Add to our collection
-    issues.forEach((issue) => this.addIssue(issue));
+    for (const issue of issues) this.addIssue(issue);
     
     return issues;
   }

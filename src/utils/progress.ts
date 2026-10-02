@@ -202,7 +202,7 @@ export class ProgressReporter {
     const event: ProgressEvent = { type, timestamp: new Date(), data };
     const listeners = this.listeners.get(type);
     if (listeners) {
-      listeners.forEach(listener => listener(event));
+      for (const listener of listeners) listener(event);
     }
   }
 
