@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.5](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.4...v2.8.5) (2026-10-09)
+
+
+### Bug Fixes
+
+* CLI exit codes, Biome-only lint gate, Node 22, docs ([#78](https://github.com/forbiddenlink/repro-in-a-box/issues/78)) ([5651084](https://github.com/forbiddenlink/repro-in-a-box/commit/5651084cfbfb335a3ad4f4396952191a858d1381))
+
 ## [2.8.4](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.3...v2.8.4) (2026-09-21)
 
 
