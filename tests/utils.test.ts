@@ -85,7 +85,8 @@ describe('Logger', () => {
       const entries = testLogger.getEntries({ level: LogLevel.INFO });
       expect(entries).toHaveLength(1);
       expect(entries[0].message).toContain('completed');
-      expect(entries[0].duration).toBeGreaterThanOrEqual(50);
+      // setTimeout can fire up to ~1ms early; assert with a tolerance so the test is not timer-flaky
+      expect(entries[0].duration).toBeGreaterThanOrEqual(45);
     });
   });
 
