@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.6](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.5...v2.8.6) (2026-10-19)
+
+
+### Bug Fixes
+
+* **deps:** clear transitive CVEs with bounded overrides ([#86](https://github.com/forbiddenlink/repro-in-a-box/issues/86)) ([226118e](https://github.com/forbiddenlink/repro-in-a-box/commit/226118e2283b797187a8f96baeb28e3e042caa3b))
+
 ## [2.8.5](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.4...v2.8.5) (2026-10-09)
 
 
