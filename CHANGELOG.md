@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.7](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.6...v2.8.7) (2026-10-20)
+
+
+### Bug Fixes
+
+* **deps:** cap unbounded pnpm overrides at the next major ([#90](https://github.com/forbiddenlink/repro-in-a-box/issues/90)) ([7bf08e0](https://github.com/forbiddenlink/repro-in-a-box/commit/7bf08e0c5b8761ba8a05ff4d00efb5439c67668c))
+
 ## [2.8.6](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.5...v2.8.6) (2026-10-19)
 
 
