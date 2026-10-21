@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.8](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.7...v2.8.8) (2026-10-21)
+
+
+### Bug Fixes
+
+* **deps:** raise vite override floor to 8.3.3 ([#94](https://github.com/forbiddenlink/repro-in-a-box/issues/94)) ([5f15a31](https://github.com/forbiddenlink/repro-in-a-box/commit/5f15a31d606837e6d95f8c1a77c36a445a091fe7))
+
 ## [2.8.7](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.6...v2.8.7) (2026-10-20)
 
 
