@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.9](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.8...v2.8.9) (2026-10-24)
+
+
+### Bug Fixes
+
+* **deps:** bump vitest to 4.1.12 so @vitest/mocker resolves to the patched release ([#96](https://github.com/forbiddenlink/repro-in-a-box/issues/96)) ([6a5a46f](https://github.com/forbiddenlink/repro-in-a-box/commit/6a5a46f313341667258bfd91054137398f1981c2))
+
 ## [2.8.8](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.7...v2.8.8) (2026-10-21)
 
 
