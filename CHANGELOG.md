@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.10](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.9...v2.8.10) (2026-10-27)
+
+
+### Bug Fixes
+
+* **deps:** force patched body-parser 2.4 ([#101](https://github.com/forbiddenlink/repro-in-a-box/issues/101)) ([12dbebd](https://github.com/forbiddenlink/repro-in-a-box/commit/12dbebd57ba5fc4c4a02638bc700ae1346613033))
+
 ## [2.8.9](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.8.8...v2.8.9) (2026-10-24)
 
 
