@@ -70,7 +70,10 @@ export async function createBundle(options: BundleOptions): Promise<BundleResult
   contents.push('reproduce.sh');
 
   // 5. Add README
-  const readme = generateReadme(options.scanResults);
+  const readme = generateReadme(options.scanResults, {
+    har: contents.includes('recording.har'),
+    screenshots: screenshotPaths.length > 0,
+  });
   zip.addFile('README.md', Buffer.from(readme, 'utf-8'));
   contents.push('README.md');
 
@@ -147,7 +150,10 @@ echo "✅ Reproduction complete!"
 /**
  * Generates README for the bundle
  */
-function generateReadme(results: ScanResults): string {
+function generateReadme(
+  results: ScanResults,
+  held: { har: boolean; screenshots: boolean },
+): string {
   const url = results.pages[0]?.url || 'Unknown';
   const timestamp = new Date(results.timestamp).toISOString();
 
@@ -213,6 +219,14 @@ See \`scan-results.json\` for complete issue details including:
 - Source URLs and line numbers
 - Stack traces (where applicable)
 - Severity and category classification
+
+## Before you share this bundle
+
+repro-in-a-box does not upload bundles. The ZIP stays where the scan wrote it.
+${held.har ? '\n- `recording.har` is a raw network recording. It can contain request headers such as Authorization, response headers such as Set-Cookie, and response bodies from the scanned site.' : ''}${held.screenshots ? '\n- `screenshots/` shows the pages as they rendered.' : ''}
+- \`scan-results.json\` lists page URLs, console messages and stack traces.
+
+Review these files before you attach the bundle to a public issue.
 `;
 }
 
