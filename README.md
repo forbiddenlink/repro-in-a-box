@@ -1,4 +1,4 @@
-# Repro-in-a-Box 🎁
+# Repro-in-a-box
 
 **Find bugs. Freeze them. Ship them.**
 
@@ -9,7 +9,7 @@ Autonomous QA agent that finds bugs on your site, captures reproducible evidence
 See [package.json](./package.json) and [CHANGELOG.md](./CHANGELOG.md) for the current
 published version; test/coverage figures below are a point-in-time snapshot, not a live badge.
 
-## ✨ Features
+## Features
 
 - **12 Built-in Detectors**: JavaScript errors, network failures, broken assets, accessibility (WCAG 2.1), web vitals, mixed content, broken links, console warnings, SEO, performance, security headers, memory leaks
 - **Plugin API**: Load `repro-plugin-*` packages or local modules with custom detectors and scan hooks
@@ -17,10 +17,10 @@ published version; test/coverage figures below are a point-in-time snapshot, not
   - Structured logging with multiple output levels
   - Comprehensive error handling with exit codes
   - Configurable timeouts for navigation, actions, and detection
-  - Asset blocking for 30-40% faster scans
+  - Optional asset blocking for faster scans
   - Real-time progress reporting with multiple formats
-- **Well Tested**: Vitest suite with ~85% code coverage (see CI for the current test count)
-- **Performance Benchmarked**: <100ms detector attach, <500ms collect, <1s for 100 issues
+- **Well tested**: Vitest suite under `tests/`, including integration tests for the scan workflow and MCP server
+- **Performance tests**: `tests/performance.test.ts` asserts detector attach under 100 ms and collection under 500 ms
 - **Multi-Page Crawler**: Configurable depth, rate limiting, same-domain filtering
 - **Auto-Bundling**: Creates reproducible ZIP packages with HAR files and screenshots
 - **HTML Reports**: Professional, modern HTML reports with interactive tables and visual distributions
@@ -28,7 +28,9 @@ published version; test/coverage figures below are a point-in-time snapshot, not
 - **Diff Comparison**: Compare scan results across runs
 - **MCP Server**: Claude Desktop integration for AI-powered bug hunting
 
-## 🚀 Quick Start
+## Quick start
+
+Requires Node.js 22 or newer and pnpm (`engines` and `packageManager` in `package.json`). Playwright needs a browser: run `pnpm exec playwright install chromium` once after installing.
 
 ```bash
 # Install
@@ -56,21 +58,21 @@ repro diff scan-results-1.json scan-results-2.json
 pnpm run mcp
 ```
 
-## 📚 Documentation
+## Documentation
 
 Complete documentation available in the [docs/](./docs/) directory:
 
 - **[Getting Started](./docs/guides/README.md)** - Feature overview, CLI usage, configuration
 - **[Logging & Error Handling](./docs/guides/logging.md)** - Structured logging and debugging
 - **[Timeout Configuration](./docs/guides/timeout-config.md)** - Network and action timeouts
-- **[Asset Blocking](./docs/guides/asset-blocking.md)** - Performance optimization (30-40% faster)
+- **[Asset Blocking](./docs/guides/asset-blocking.md)** - Performance optimization
 - **[Progress Reporting](./docs/guides/progress.md)** - Real-time scanning feedback
 - **[Integration & API](./docs/guides/integration.md)** - Node.js library, CI/CD, MCP server integration
 - **[Troubleshooting](./docs/guides/troubleshooting.md)** - Common issues and solutions
 
 **See [docs/README.md](./docs/README.md) for the complete documentation index.**
 
-## 📦 What's in the Box
+## What is included
 
 #### 12 Detectors (`src/detectors/`)
 
@@ -115,7 +117,7 @@ Complete documentation available in the [docs/](./docs/) directory:
 - Tools: `scan_site` (scan and bundle websites), `validate_reproduction` (validate HAR
   replay), `diff_scans` (compare scan results)
 
-## 📋 Commands
+## Commands
 
 ### `scan` - Detect issues and create bundles
 
@@ -224,7 +226,27 @@ Examples:
 repro diff scan-a.json scan-b.json
 repro diff scan-a.json scan-b.json --json -o diff.json
 ```
-## ⚙️ Configuration
+
+### `export-summary` - Export aggregate counts only
+
+```bash
+repro export-summary ./scan-results.json --output ./summary.zip
+```
+
+This explicit local export includes only aggregate counts by fixed severity/category
+groups and a README. It does not scan or upload anything, follow HAR/screenshot paths,
+or include URLs, messages, headers, bodies, screenshots, recordings, timestamps, or
+reproduction scripts. Unknown count groups are combined into `other`. Input must be
+a regular, non-symlink scan-results JSON file no larger than 5 MiB. The output
+directory must already exist; an existing destination is never overwritten.
+
+**Summary only, not a replay bundle. Review before sharing.** Aggregate information
+can still be confidential; this is not a guarantee of anonymity or suitability for
+publication. Original artifacts remain unchanged and may contain sensitive data.
+Use the original raw `--bundle` output for replay; its behavior and raw-data warning
+are unchanged. `repro validate` rejects summary exports before extraction.
+
+## Configuration
 
 Repro-in-a-Box supports configuration files to set default values for all options. This eliminates the need to pass the same flags repeatedly.
 
@@ -466,7 +488,8 @@ repro scan https://localhost:3000 --no-headless --max-pages 5
 ```bash
 repro scan https://prod.example.com --config repro-prod.json
 ```
-## 🔌 MCP Server Integration
+
+## MCP server integration
 
 Repro-in-a-Box includes an MCP server for Claude Desktop integration.
 
@@ -512,7 +535,7 @@ Compare scans:
 "Compare scan-results-1.json with scan-results-2.json"
 ```
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests once (CI-style)
@@ -530,7 +553,7 @@ pnpm run test:run -- --coverage
 
 See CI for the current test count and coverage; see `tests/` (mirrors `src/` structure).
 
-## 📊 Example Output
+## Example output
 
 ### Scan Output
 
@@ -589,16 +612,16 @@ Issues by category:
    ./reproduce.sh
 ```
 
-## 🗺️ Roadmap
+## Roadmap
 
 See [ROADMAP.md](./ROADMAP.md) for shipped features and what's still planned.
 
-## 🏗️ Architecture
+## Architecture
 
 See the Layout section in [CLAUDE.md](./CLAUDE.md) for the full `src/` breakdown (detectors,
 crawler, scanner, bundler, determinism, reporters, plugins, config, mcp, cli).
 
-## 🔧 Development
+## Development
 
 ```bash
 # Install dependencies
@@ -629,31 +652,11 @@ npx tsc --noEmit
 Tests live in `tests/` (mirrors `src/` structure) and `tests/integration/` (full scan
 workflow, MCP tool validation). See CI for the current test count and coverage.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for development
 guidelines and [ROADMAP.md](./ROADMAP.md) for what's planned.
 
-## 📝 License
+## License
 
 MIT © 2026
-
-
-## Aggregate-only summary export
-
-```bash
-repro export-summary ./scan-results.json --output ./summary.zip
-```
-
-This explicit local export includes only aggregate counts by fixed severity/category
-groups and a README. It does not scan or upload anything, follow HAR/screenshot paths,
-or include URLs, messages, headers, bodies, screenshots, recordings, timestamps, or
-reproduction scripts. Unknown count groups are combined into `other`. Input must be
-a regular, non-symlink scan-results JSON file no larger than 5 MiB. The output
-directory must already exist; an existing destination is never overwritten.
-
-**Summary only, not a replay bundle. Review before sharing.** Aggregate information
-can still be confidential; this is not a guarantee of anonymity or suitability for
-publication. Original artifacts remain unchanged and may contain sensitive data.
-Use the original raw `--bundle` output for replay; its behavior and raw-data warning
-are unchanged. `repro validate` rejects summary exports before extraction.

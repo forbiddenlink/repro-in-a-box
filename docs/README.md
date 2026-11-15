@@ -44,7 +44,7 @@ Essential guides for using and integrating Repro-in-a-Box:
 → Use [Asset Blocking](./guides/asset-blocking.md) to save bandwidth
 
 **Optimize performance**
-→ Read [Asset Blocking](./guides/asset-blocking.md) guide (30-40% faster)
+→ Read [Asset Blocking](./guides/asset-blocking.md) guide (faster scans)
 → Configure [Timeout Configuration](./guides/timeout-config.md) appropriately
 → Use [Progress Reporting](./guides/progress.md#performance-monitoring) to track improvements
 

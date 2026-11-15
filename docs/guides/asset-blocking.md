@@ -2,7 +2,7 @@
 
 ## Overview
 
-Block unnecessary resource downloads (images, fonts, media, styles) to achieve **30-40% faster scans** with zero impact on detection accuracy.
+Block unnecessary resource downloads (images, fonts, media, styles) to speed up scans. Blocking assets can change what some detectors see (for example broken-asset and web-vitals results), so leave it off when those matter.
 
 ## Quick Start
 
@@ -28,7 +28,9 @@ npx repro-in-a-box scan https://example.com --no-asset-blocking
 | **Media** | --block-media | Very High (saves 60%+ bandwidth) | MP3, MP4, WebM, OGG, WAV, FLV |
 | **Stylesheets** | --block-styles | Low (saves 5% bandwidth) | CSS |
 
-## Performance Improvement
+## Performance improvement
+
+Illustrative example only; these figures are not a measured benchmark and your results will vary.
 
 ```
 Without Blocking    With Blocking    Improvement

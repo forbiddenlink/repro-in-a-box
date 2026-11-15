@@ -12,7 +12,7 @@ Welcome to the Repro-in-a-Box feature documentation. Choose a topic below:
 ### Core Features  
 - [Structured Logging](./logging.md) - Debug and monitor your scans
 - [Timeout Configuration](./timeout-config.md) - Prevent hangs, optimize speed
-- [Asset Blocking](./asset-blocking.md) - 30-40% faster scans
+- [Asset Blocking](./asset-blocking.md) - faster scans
 - [Progress Reporting](./progress.md) - Real-time feedback during scanning
 
 ### Advanced
