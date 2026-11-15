@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.9.1...v2.10.0) (2026-11-15)
+
+
+### Features
+
+* **cli:** add opt-in aggregate summary export; fix dot-prefixed filename check ([#113](https://github.com/forbiddenlink/repro-in-a-box/issues/113)) ([97b38a4](https://github.com/forbiddenlink/repro-in-a-box/commit/97b38a48b77f744ffd90b571ed9a732c01f5bfab))
+
 ## [2.9.1](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.9.0...v2.9.1) (2026-11-13)
 
 
