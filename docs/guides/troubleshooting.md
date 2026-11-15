@@ -73,7 +73,7 @@
      --action-timeout 10000
    ```
 
-2. **Enable asset blocking** (30-40% faster):
+2. **Enable asset blocking** (faster scans):
    ```bash
    npx repro-in-a-box scan https://example.com \
      --block-images --block-media
