@@ -637,3 +637,23 @@ guidelines and [ROADMAP.md](./ROADMAP.md) for what's planned.
 ## 📝 License
 
 MIT © 2026
+
+
+## Aggregate-only summary export
+
+```bash
+repro export-summary ./scan-results.json --output ./summary.zip
+```
+
+This explicit local export includes only aggregate counts by fixed severity/category
+groups and a README. It does not scan or upload anything, follow HAR/screenshot paths,
+or include URLs, messages, headers, bodies, screenshots, recordings, timestamps, or
+reproduction scripts. Unknown count groups are combined into `other`. Input must be
+a regular, non-symlink scan-results JSON file no larger than 5 MiB. The output
+directory must already exist; an existing destination is never overwritten.
+
+**Summary only, not a replay bundle. Review before sharing.** Aggregate information
+can still be confidential; this is not a guarantee of anonymity or suitability for
+publication. Original artifacts remain unchanged and may contain sensitive data.
+Use the original raw `--bundle` output for replay; its behavior and raw-data warning
+are unchanged. `repro validate` rejects summary exports before extraction.

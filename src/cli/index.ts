@@ -8,6 +8,7 @@ import { scanCommand } from './commands/scan.js';
 import { validateCommand } from './commands/validate.js';
 import { diffCommand } from './commands/diff.js';
 import { initCommand } from './commands/init.js';
+import { exportSummaryCommand } from './commands/export-summary.js';
 import { VERSION } from './version.js';
 import { registerGlobalErrorHandlers } from '../utils/errors.js';
 
@@ -32,5 +33,8 @@ program.addCommand(validateCommand);
 
 // Diff command: Compare two scan results
 program.addCommand(diffCommand);
+
+// Aggregate-only export: no scan, replay, or upload.
+program.addCommand(exportSummaryCommand);
 
 program.parse();

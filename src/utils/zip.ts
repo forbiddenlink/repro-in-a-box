@@ -17,3 +17,10 @@ export function extractZipSafely(zip: AdmZip, destDir: string): void {
 
   zip.extractAllTo(destResolved, true);
 }
+
+/** Summary exports intentionally have no replay evidence. */
+export function assertReplayableArchive(zip: AdmZip): void {
+  if (zip.getEntry('summary.json') && !zip.getEntry('scan-results.json')) {
+    throw new Error('This is a summary-only export, not a replay bundle. Use the original raw bundle for validation.');
+  }
+}

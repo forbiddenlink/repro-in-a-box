@@ -11,12 +11,18 @@ describe('resolveSafePath', () => {
     expect(resolved).toBe(path.join(root, 'bundle.zip'));
   });
 
+  it('allows in-root filenames that begin with two dots', () => {
+    expect(resolveSafePath('..report.json', root)).toBe(path.join(root, '..report.json'));
+    expect(resolveSafePath('..notes/scan.json', root)).toBe(path.join(root, '..notes/scan.json'));
+  });
+
   it('allows nested relative paths', () => {
     const resolved = resolveSafePath('out/scan.json', root);
     expect(resolved).toBe(path.join(root, 'out', 'scan.json'));
   });
 
   it('rejects path traversal', () => {
+    expect(() => resolveSafePath('..', root)).toThrow(/escapes allowed directory/);
     expect(() => resolveSafePath('../etc/passwd', root)).toThrow(/escapes allowed directory/);
     expect(() => resolveSafePath('foo/../../etc/passwd', root)).toThrow(/escapes allowed directory/);
   });
