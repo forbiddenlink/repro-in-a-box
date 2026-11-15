@@ -5,7 +5,7 @@ import { Scanner, type ScanResults } from '../scanner/index.js';
 import { DetectorRegistry } from '../detectors/index.js';
 import { createScanRegistry } from '../plugins/index.js';
 import { analyzeConsistency } from './diff.js';
-import { extractZipSafely } from '../utils/zip.js';
+import { assertReplayableArchive, extractZipSafely } from '../utils/zip.js';
 
 export interface ReplayOptions {
   harPath: string;
@@ -302,6 +302,7 @@ async function extractBundle(bundlePath: string, outputDir?: string): Promise<st
   const AdmZip = (await import('adm-zip')).default;
   
   const zip = new AdmZip(bundlePath);
+  assertReplayableArchive(zip);
   const extractDir = outputDir || path.join(path.dirname(bundlePath), 'extracted');
   
   await fs.mkdir(extractDir, { recursive: true });

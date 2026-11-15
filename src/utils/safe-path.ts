@@ -13,7 +13,7 @@ export function resolveSafePath(userPath: string, root: string = process.cwd()):
   const resolved = path.resolve(rootResolved, userPath);
   const relative = path.relative(rootResolved, resolved);
 
-  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+  if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
     throw new Error(`Path escapes allowed directory (${rootResolved}): ${userPath}`);
   }
 

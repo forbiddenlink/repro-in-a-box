@@ -1,0 +1,23 @@
+import { afterEach, expect, it, vi } from 'vitest';
+import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
+import * as path from 'node:path';
+const dirs: string[] = [];
+const exitCode = process.exitCode;
+afterEach(async () => { vi.restoreAllMocks(); process.exitCode = exitCode; for (const dir of dirs.splice(0)) await fs.rm(dir, { recursive: true, force: true }); });
+it('explicit CLI export logs only a fixed summary notice and refuses overwrite', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'repro-summary-cli-')); dirs.push(dir);
+  const input = path.join(dir, 'SYNTHETIC_PATH_CANARY.json'); const output = path.join(dir, 'summary.zip');
+  await fs.writeFile(input, JSON.stringify({ pages: [], summary: { pagesScanned: 0, totalIssues: 0, bySeverity: {}, byCategory: {} } }));
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const { exportSummaryCommand } = await import('../../src/cli/commands/export-summary.js');
+  expect(exportSummaryCommand.helpInformation()).toContain('no HAR, screenshots, replay or uploads');
+  await exportSummaryCommand.parseAsync(['node', 'export-summary', input, '--output', output]);
+  expect(log).toHaveBeenCalledWith(expect.stringContaining('Summary only. No replay data'));
+  const before = await fs.readFile(output);
+  await exportSummaryCommand.parseAsync(['node', 'export-summary', input, '--output', output]);
+  expect(process.exitCode).toBe(1);
+  expect(await fs.readFile(output)).toEqual(before);
+  expect(JSON.stringify([...log.mock.calls, ...error.mock.calls])).not.toContain('SYNTHETIC_PATH_CANARY');
+});
