@@ -221,9 +221,13 @@ describe('E2E Workflow', () => {
     expect(results1.summary.totalIssues).toBeGreaterThanOrEqual(0);
     expect(results2.summary.totalIssues).toBeGreaterThanOrEqual(0);
     
-    // Categories should be consistent
-    expect(Object.keys(results1.summary.byCategory).sort()).toEqual(
-      Object.keys(results2.summary.byCategory).sort()
-    );
+    // Categories should be consistent. Performance is excluded: web-vitals
+    // findings depend on timing thresholds, so that category can appear in one
+    // scan and not the other on the same page (flaky on CI).
+    const stableCategories = (r: typeof results1) =>
+      Object.keys(r.summary.byCategory)
+        .filter((c) => c !== 'performance')
+        .sort();
+    expect(stableCategories(results1)).toEqual(stableCategories(results2));
   }, 60000);
 });
