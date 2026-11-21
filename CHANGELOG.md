@@ -5,6 +5,13 @@ All notable changes to repro-in-a-box will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.3](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.10.2...v2.10.3) (2026-11-21)
+
+
+### Bug Fixes
+
+* **web-vitals:** measure vitals on pages with a strict CSP ([#124](https://github.com/forbiddenlink/repro-in-a-box/issues/124)) ([76e2153](https://github.com/forbiddenlink/repro-in-a-box/commit/76e2153c6239b158700cb2bd06f006964c5273d1))
+
 ## [2.10.2](https://github.com/forbiddenlink/repro-in-a-box/compare/v2.10.1...v2.10.2) (2026-11-21)
 
 
