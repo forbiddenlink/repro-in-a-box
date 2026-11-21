@@ -23,11 +23,30 @@ export interface CrawlerConfig {
 /**
  * A crawled page result
  */
+/**
+ * True when Playwright reports that the page, its renderer, or the browser died.
+ * These failures are per-page and recoverable with a fresh page, unlike DNS or TLS errors.
+ */
+export function isPageCrashError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /Page crashed|Target crashed|Target page, context or browser has been closed|Target closed/i.test(message);
+}
+
+/** True when a navigation hit its timeout (for example networkidle never settles). */
+export function isNavigationTimeoutError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /page\.goto: Timeout \d+ms exceeded/i.test(message);
+}
+
 export interface CrawledPage {
   url: string;
   depth: number;
   statusCode: number;
   timestamp: number;
+  /** Set when the page could not be loaded; the scanner records it as a finding and recovers */
+  failure?: 'crash' | 'timeout';
+  /** Error message for a failed page */
+  error?: string;
 }
 
 /**
@@ -196,7 +215,7 @@ export class Crawler {
    * Crawl starting from a URL
    */
   async *crawl(
-    page: Page,
+    pageOrGetter: Page | (() => Page),
     startUrl: string
   ): AsyncGenerator<CrawledPage, void, unknown> {
     // Reset state
@@ -217,10 +236,24 @@ export class Crawler {
       }
       
       // Crawl the page
+      // The scanner may swap in a fresh page after a crash, so resolve it per navigation
+      const page = typeof pageOrGetter === 'function' ? pageOrGetter() : pageOrGetter;
       try {
         const result = await this.crawlPage(page, url, depth);
         yield result;
       } catch (error) {
+        const crashed = isPageCrashError(error);
+        if (crashed || isNavigationTimeoutError(error)) {
+          yield {
+            url: this.normalizeUrl(url),
+            depth,
+            statusCode: 0,
+            timestamp: Date.now(),
+            failure: crashed ? 'crash' : 'timeout',
+            error: error instanceof Error ? error.message : String(error),
+          };
+          continue;
+        }
         throw new Error(`Failed to crawl ${url}: ${error instanceof Error ? error.message : String(error)}`, {
           cause: error,
         });
