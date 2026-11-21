@@ -32,14 +32,20 @@ export function isPageCrashError(error: unknown): boolean {
   return /Page crashed|Target crashed|Target page, context or browser has been closed|Target closed/i.test(message);
 }
 
+/** True when a navigation hit its timeout (for example networkidle never settles). */
+export function isNavigationTimeoutError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /page\.goto: Timeout \d+ms exceeded/i.test(message);
+}
+
 export interface CrawledPage {
   url: string;
   depth: number;
   statusCode: number;
   timestamp: number;
-  /** Set when the renderer died while loading this page; the scanner records it and recovers */
-  crashed?: boolean;
-  /** Error message for a crashed page */
+  /** Set when the page could not be loaded; the scanner records it as a finding and recovers */
+  failure?: 'crash' | 'timeout';
+  /** Error message for a failed page */
   error?: string;
 }
 
@@ -236,13 +242,14 @@ export class Crawler {
         const result = await this.crawlPage(page, url, depth);
         yield result;
       } catch (error) {
-        if (isPageCrashError(error)) {
+        const crashed = isPageCrashError(error);
+        if (crashed || isNavigationTimeoutError(error)) {
           yield {
             url: this.normalizeUrl(url),
             depth,
             statusCode: 0,
             timestamp: Date.now(),
-            crashed: true,
+            failure: crashed ? 'crash' : 'timeout',
             error: error instanceof Error ? error.message : String(error),
           };
           continue;

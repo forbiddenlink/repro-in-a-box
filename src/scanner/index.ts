@@ -330,12 +330,15 @@ export class Scanner {
     if (browser) await safeClose(() => browser.close());
   }
 
-  /** Synthetic result for a page whose renderer crashed, so the crash shows up as a finding */
-  private crashedPageResult(crawledPage: CrawledPage): PageScanResult {
+  /** Synthetic result for a page that crashed or timed out, so it shows up as a finding */
+  private failedPageResult(crawledPage: CrawledPage): PageScanResult {
     const now = Date.now();
+    const crashed = crawledPage.failure === 'crash';
     const issue = {
-      type: 'page-crash',
-      message: `Page crashed while loading: ${crawledPage.error ?? 'renderer terminated'}`,
+      type: crashed ? 'page-crash' : 'page-timeout',
+      message: crashed
+        ? `Page crashed while loading: ${crawledPage.error ?? 'renderer terminated'}`
+        : `Page did not finish loading: ${crawledPage.error ?? 'navigation timed out'}`,
       severity: IssueSeverity.ERROR,
       category: IssueCategory.JAVASCRIPT,
       url: crawledPage.url,
@@ -541,9 +544,9 @@ export class Scanner {
         for await (const crawledPage of crawler.crawl(() => this.page as Page, config.url)) {
           if (deadlineExceeded) break;
 
-          if (crawledPage.crashed) {
-            console.log(`💥 Page crashed: ${crawledPage.url}`);
-            pages.push(this.crashedPageResult(crawledPage));
+          if (crawledPage.failure) {
+            console.log(`💥 Page ${crawledPage.failure === 'crash' ? 'crashed' : 'timed out'}: ${crawledPage.url}`);
+            pages.push(this.failedPageResult(crawledPage));
             this.progress.foundIssue(IssueSeverity.ERROR, IssueCategory.JAVASCRIPT);
             await this.recyclePage(false);
             continue;

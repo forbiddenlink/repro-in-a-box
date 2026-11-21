@@ -99,6 +99,25 @@ describe('page crash recovery', () => {
     expect(browser.pages[browser.pages.length - 1].goto).toHaveBeenCalledWith(`${ROOT}b`, expect.anything());
   });
 
+  it('records a navigation timeout as a finding and continues', async () => {
+    browser.context.newPage.mockImplementationOnce(() => {
+      const page = browser.makePage();
+      page.$$eval.mockResolvedValue([`${ROOT}slow`, `${ROOT}b`]);
+      page.goto
+        .mockResolvedValueOnce({ status: () => 200 })
+        .mockRejectedValueOnce(new Error('page.goto: Timeout 30000ms exceeded.'));
+      browser.pages.push(page);
+      return Promise.resolve(page);
+    });
+
+    const results = await runScan();
+
+    expect(results.pages.map((p) => p.url)).toEqual([ROOT, `${ROOT}slow`, `${ROOT}b`]);
+    const issues = results.pages[1].detectorResults.flatMap((r) => r.issues);
+    expect(issues).toHaveLength(1);
+    expect(issues[0]).toMatchObject({ type: 'page-timeout', severity: 'error' });
+  });
+
   it('still rejects non-crash navigation failures', async () => {
     browser.context.newPage.mockImplementationOnce(() => {
       const page = browser.makePage();
