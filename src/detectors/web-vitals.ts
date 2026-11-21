@@ -1,11 +1,36 @@
+import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 import type { Page } from '@playwright/test';
 import { BaseDetector, IssueCategory, IssueSeverity, type DetectorConfig, type Issue } from './base.js';
 
-// Extend Window interface for web-vitals custom property
+type MetricCallback = (metric: Omit<WebVitalsMetric, 'name'>) => void;
+
+interface WebVitalsLib {
+  onCLS(cb: MetricCallback, opts?: { reportAllChanges?: boolean }): void;
+  onINP(cb: MetricCallback, opts?: { reportAllChanges?: boolean }): void;
+  onLCP(cb: MetricCallback, opts?: { reportAllChanges?: boolean }): void;
+  onFCP(cb: MetricCallback): void;
+  onTTFB(cb: MetricCallback): void;
+}
+
+// The web-vitals IIFE bundle assigns its API to a global we copy onto window.
 declare global {
   interface Window {
-    __webVitalsReady?: unknown[];
+    __reproWebVitals?: WebVitalsLib;
   }
+}
+
+const require = createRequire(import.meta.url);
+let webVitalsSource: string | undefined;
+
+/** Read the web-vitals IIFE bundle shipped in node_modules (no network fetch). */
+async function loadWebVitalsSource(): Promise<string> {
+  if (webVitalsSource === undefined) {
+    const entry = require.resolve('web-vitals');
+    webVitalsSource = await readFile(join(dirname(entry), 'web-vitals.iife.js'), 'utf8');
+  }
+  return webVitalsSource;
 }
 
 /**
@@ -36,64 +61,35 @@ export class WebVitalsDetector extends BaseDetector {
 
   async scan(page: Page, _config?: DetectorConfig): Promise<Issue[]> {
     try {
-      // Inject and run web-vitals library using a script tag approach
-      // This avoids Vite's dynamic import issues in test environments
-      // Note: page.evaluate runs in browser context where document/window exist
+      // Load the bundled web-vitals IIFE through the debugging protocol instead of a
+      // <script> tag. A script tag (inline or from a CDN) is blocked by any page whose
+      // Content-Security-Policy restricts script-src, which turned every scan of such a
+      // site into a CSP violation and returned no metrics. page.evaluate of a string is
+      // not subject to the page's CSP.
+      await page.evaluate(`${await loadWebVitalsSource()}\nwindow.__reproWebVitals = webVitals;`);
+
       const metrics = await page.evaluate(() => {
         return new Promise<WebVitalsMetric[]>((resolve) => {
-          /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment */
-          const collectedMetrics: WebVitalsMetric[] = [];
+          const lib = window.__reproWebVitals;
+          if (!lib) {
+            resolve([]);
+            return;
+          }
 
-          const script = document.createElement('script');
-          script.type = 'module';
-          script.textContent = `
-            import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
+          // reportAllChanges re-reports CLS, INP and LCP as they change; keep the latest per metric.
+          const latest = new Map<WebVitalsMetric['name'], WebVitalsMetric>();
+          const record = (name: WebVitalsMetric['name']) => (metric: Omit<WebVitalsMetric, 'name'>) => {
+            latest.set(name, { name, value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
+          };
 
-            const metrics = [];
+          lib.onCLS(record('CLS'), { reportAllChanges: true });
+          lib.onINP(record('INP'), { reportAllChanges: true });
+          lib.onLCP(record('LCP'), { reportAllChanges: true });
+          lib.onFCP(record('FCP'));
+          lib.onTTFB(record('TTFB'));
 
-            onCLS((metric) => {
-              metrics.push({ name: 'CLS', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
-              window.__webVitalsReady = metrics;
-            });
-
-            onINP((metric) => {
-              metrics.push({ name: 'INP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
-              window.__webVitalsReady = metrics;
-            });
-
-            onLCP((metric) => {
-              metrics.push({ name: 'LCP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
-              window.__webVitalsReady = metrics;
-            });
-
-            onFCP((metric) => {
-              metrics.push({ name: 'FCP', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
-              window.__webVitalsReady = metrics;
-            });
-
-            onTTFB((metric) => {
-              metrics.push({ name: 'TTFB', value: metric.value, rating: metric.rating, delta: metric.delta, id: metric.id });
-              window.__webVitalsReady = metrics;
-            });
-          `;
-
-          document.head.appendChild(script);
-
-          // Wait for metrics to be collected
-          const checkInterval = setInterval(() => {
-            const ready = window.__webVitalsReady;
-            if (ready) {
-              clearInterval(checkInterval);
-              resolve(ready as WebVitalsMetric[]);
-            }
-          }, 100);
-
-          // Timeout after 2 seconds
-          setTimeout(() => {
-            clearInterval(checkInterval);
-            resolve(collectedMetrics);
-          }, 2000);
-          /* eslint-enable */
+          // Buffered entries report shortly after registration; give them time to arrive.
+          setTimeout(() => resolve([...latest.values()]), 2000);
         });
       });
 
