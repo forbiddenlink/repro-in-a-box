@@ -1,6 +1,7 @@
 import { chromium, type Browser, type Page, type BrowserContext } from '@playwright/test';
 import { DetectorRegistry, type DetectorResult } from '../detectors/index.js';
 import { Crawler, type CrawlerConfig, type CrawledPage } from '../crawler/index.js';
+import { IssueCategory, IssueSeverity } from '../detectors/base.js';
 import { createProgressReporter, type ProgressReporter, type ProgressFormat } from '../utils/progress.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -15,6 +16,30 @@ export interface TimeoutConfig {
   action?: number;
   /** Timeout for detector operations in ms */
   detection?: number;
+  /** Deadline for the whole scan in ms. When hit, the browser is closed and partial results are returned. */
+  scan?: number;
+}
+
+/** Close a browser handle without ever throwing or hanging; it may already be gone. */
+const CLOSE_TIMEOUT_MS = 10_000;
+/** A fresh context every few pages keeps one renderer from accumulating state until it dies. */
+const PAGES_PER_CONTEXT = 3;
+
+async function safeClose(closeFn: () => Promise<unknown>): Promise<void> {
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    await Promise.race([
+      closeFn(),
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, CLOSE_TIMEOUT_MS);
+        timer.unref?.();
+      }),
+    ]);
+  } catch {
+    // Target page, context or browser has been closed: nothing left to release
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 /**
@@ -98,6 +123,8 @@ export interface ScanResults {
     bySeverity: Record<string, number>;
   };
   harPath?: string;
+  /** True when the scan hit its global deadline and results are partial */
+  deadlineExceeded?: boolean;
 }
 
 /**
@@ -125,6 +152,8 @@ export class Scanner {
   private browser?: Browser;
   private context?: BrowserContext;
   private page?: Page;
+  private contextOptions: { recordHar?: { path: string; mode: 'minimal' | 'full' } } = {};
+  private pagesInContext = 0;
   private config?: ScanConfig;
   private screenshotCounter = 0;
   private progress?: ProgressReporter;
@@ -162,9 +191,26 @@ export class Scanner {
       };
     }
 
+    this.contextOptions = contextOptions;
     this.context = await this.browser.newContext(contextOptions);
-    this.page = await this.context.newPage();
-    
+    await this.openPage();
+  }
+
+  /**
+   * Open a fresh page in the current context (or a fresh context if it is gone) and
+   * configure it. Used at startup and to recover after a renderer crash.
+   */
+  private async openPage(): Promise<Page> {
+    const config = this.config;
+    if (!this.browser || !config) throw new Error('Browser is not initialized');
+    try {
+      this.page = await this.context!.newPage();
+    } catch {
+      this.context = await this.browser.newContext(this.contextOptions);
+      this.page = await this.context.newPage();
+    }
+    this.pagesInContext = 0;
+
     // Apply action timeout if configured
     if (config.timeouts?.action) {
       this.page.setDefaultTimeout(config.timeouts.action);
@@ -179,6 +225,27 @@ export class Scanner {
     const assetConfig = config.assetBlocking ?? { enabled: true };
     if (assetConfig.enabled !== false) {
       await this.setupAssetBlocking(this.page, assetConfig);
+    }
+    return this.page;
+  }
+
+  /**
+   * Replace the current page, and optionally its context, then re-attach detectors.
+   * Detector state (collected issues) lives on the detector instances, so it survives.
+   */
+  private async recyclePage(newContext: boolean): Promise<void> {
+    const oldPage = this.page;
+    this.page = undefined;
+    if (oldPage) await safeClose(() => oldPage.close());
+    if (newContext && this.browser) {
+      const oldContext = this.context;
+      this.context = undefined;
+      if (oldContext) await safeClose(() => oldContext.close());
+      this.context = await this.browser.newContext(this.contextOptions);
+    }
+    const page = await this.openPage();
+    for (const detector of this.registry.getEnabled()) {
+      await detector.attach(page, this.registry.getConfig(detector.id));
     }
   }
   
@@ -254,18 +321,43 @@ export class Scanner {
    * Cleanup browser resources
    */
   private async cleanup(): Promise<void> {
-    if (this.page) {
-      await this.page.close();
-      this.page = undefined;
-    }
-    if (this.context) {
-      await this.context.close();
-      this.context = undefined;
-    }
-    if (this.browser) {
-      await this.browser.close();
-      this.browser = undefined;
-    }
+    const { page, context, browser } = this;
+    this.page = undefined;
+    this.context = undefined;
+    this.browser = undefined;
+    if (page) await safeClose(() => page.close());
+    if (context) await safeClose(() => context.close());
+    if (browser) await safeClose(() => browser.close());
+  }
+
+  /** Synthetic result for a page whose renderer crashed, so the crash shows up as a finding */
+  private crashedPageResult(crawledPage: CrawledPage): PageScanResult {
+    const now = Date.now();
+    const issue = {
+      type: 'page-crash',
+      message: `Page crashed while loading: ${crawledPage.error ?? 'renderer terminated'}`,
+      severity: IssueSeverity.ERROR,
+      category: IssueCategory.JAVASCRIPT,
+      url: crawledPage.url,
+      timestamp: now,
+    };
+    return {
+      url: crawledPage.url,
+      depth: crawledPage.depth,
+      detectorResults: [{
+        detector: 'scanner',
+        url: crawledPage.url,
+        startTime: now,
+        endTime: now,
+        duration: 0,
+        issues: [issue],
+      }],
+      summary: {
+        totalIssues: 1,
+        byCategory: { [issue.category]: 1 },
+        bySeverity: { [issue.severity]: 1 },
+      },
+    };
   }
   
   /**
@@ -390,6 +482,8 @@ export class Scanner {
   async scan(config: ScanConfig): Promise<ScanResults> {
     const startTime = Date.now();
     const pages: PageScanResult[] = [];
+    let deadlineExceeded = false;
+    let deadlineTimer: NodeJS.Timeout | undefined;
     
     // Create progress reporter
     this.progress = createProgressReporter({
@@ -430,13 +524,35 @@ export class Scanner {
       const estimatedPages = config.crawler?.maxPages || 50;
       this.progress.setEstimatedPages(estimatedPages);
       
+      // Global deadline: closing the browser rejects whatever call is in flight, so a hung
+      // page cannot hold the scan (and the CI job) open.
+      if (config.timeouts?.scan && config.timeouts.scan > 0) {
+        deadlineTimer = setTimeout(() => {
+          deadlineExceeded = true;
+          console.warn(`⚠️  Scan deadline of ${config.timeouts?.scan}ms reached, returning partial results`);
+          const browser = this.browser;
+          if (browser) void safeClose(() => browser.close());
+        }, config.timeouts.scan);
+        deadlineTimer.unref?.();
+      }
+
       try {
         // Crawl and scan pages
-        for await (const crawledPage of crawler.crawl(this.page, config.url)) {
+        for await (const crawledPage of crawler.crawl(() => this.page as Page, config.url)) {
+          if (deadlineExceeded) break;
+
+          if (crawledPage.crashed) {
+            console.log(`💥 Page crashed: ${crawledPage.url}`);
+            pages.push(this.crashedPageResult(crawledPage));
+            this.progress.foundIssue(IssueSeverity.ERROR, IssueCategory.JAVASCRIPT);
+            await this.recyclePage(false);
+            continue;
+          }
+
           console.log(`📄 Scanning: ${crawledPage.url}`);
 
           // Scan the page
-          const result = await this.scanPage(this.page, crawledPage);
+          const result = await this.scanPage(this.page as Page, crawledPage);
           pages.push(result);
 
           // Log issues found
@@ -445,7 +561,17 @@ export class Scanner {
           } else {
             console.log(`  ✅ No issues found`);
           }
+
+          // Start the next page in a fresh context so one renderer never serves the whole crawl.
+          // Skipped while recording HAR, which is tied to the context.
+          this.pagesInContext++;
+          if (!config.recordHar && this.pagesInContext >= PAGES_PER_CONTEXT) {
+            await this.recyclePage(true);
+          }
         }
+      } catch (error) {
+        // Errors after the deadline are the browser being closed under us, not a scan failure
+        if (!deadlineExceeded) throw error;
       } finally {
         // Cleanup detectors once
         for (const detector of detectors) {
@@ -469,6 +595,7 @@ export class Scanner {
         pages,
         summary,
         harPath: config.harPath,
+        ...(deadlineExceeded ? { deadlineExceeded: true } : {}),
       };
 
       await config.hooks?.afterScan?.({ ...hookCtx, results });
@@ -482,6 +609,7 @@ export class Scanner {
       }
       throw err;
     } finally {
+      if (deadlineTimer) clearTimeout(deadlineTimer);
       await this.cleanup();
     }
   }

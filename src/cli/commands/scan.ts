@@ -46,6 +46,7 @@ export const scanCommand = new Command('scan')
   .option('--nav-timeout <ms>', 'Navigation timeout in milliseconds (default: 30000)')
   .option('--action-timeout <ms>', 'Action timeout in milliseconds (default: 30000)')
   .option('--detection-timeout <ms>', 'Detection timeout in milliseconds (default: 30000)')
+  .option('--scan-timeout <ms>', 'Deadline for the whole scan in milliseconds; partial results are returned when it is hit (default: none)')
   .option('--block-images', 'Block image downloads for faster scanning')
   .option('--block-fonts', 'Block font downloads for faster scanning')
   .option('--block-media', 'Block media downloads (video/audio) for faster scanning')
@@ -155,6 +156,7 @@ export const scanCommand = new Command('scan')
           navigation: options.navTimeout ? parseInt(options.navTimeout) : undefined,
           action: options.actionTimeout ? parseInt(options.actionTimeout) : undefined,
           detection: options.detectionTimeout ? parseInt(options.detectionTimeout) : undefined,
+          scan: options.scanTimeout ? parseInt(options.scanTimeout) : undefined,
         },
         assetBlocking: {
           enabled: options.assetBlocking !== false, // Default: enabled unless explicitly disabled
@@ -240,6 +242,8 @@ export const scanCommand = new Command('scan')
       }
 
       scanLogger.info('✅ Scan completed successfully');
+      // A leftover browser handle must never keep CI waiting after the results are written
+      process.exit(0);
     } catch (error) {
       scanLogger.error('Scan failed', error instanceof Error ? error : new Error(String(error)));
       handleError(error);
