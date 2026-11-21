@@ -28,6 +28,7 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "pnpm run build",
+    "release:publish": "rm -rf dist && pnpm run build && pnpm publish --no-git-checks",
     "dev": "tsx src/cli/index.ts",
     "test": "NODE_OPTIONS=--expose-gc vitest",
     "test:run": "NODE_OPTIONS=--expose-gc vitest run",
